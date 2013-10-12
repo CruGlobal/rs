@@ -1,363 +1,461 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"> 
 <head> 
-<title>Campus Crusade Carpool Coordinator</title> 
-<script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_KEY%>"></script>
-<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" />
-<style type="text/css">
-	body{
-		margin:10px;
-	}
-	table{
-		margin:10px 0;
-		width:450px;
-	}
-	h1{
-		font-size:2em;
-		font-weight:bold;
-		margin-bottom:.5em;
-	}
-	label, div.label{
-		display:block;
-		font-weight:bold;
-		text-align:right;
-	}
-	td, th{
-		padding:2px;
-	}
-	th{
-		background-color:#dddddd;
-		border:1px solid #000000;
-		border-bottom:3px solid #000000;
-		font-size:1.2em;
-		font-weight:bold;
-		text-align:center;
-	}
-	#disclaimer{
-		font-size:.85em;
-		margin:10px 0;
-		max-width:800px;
-	}
-	#copyright{
-		font-size:.8em;
-		margin-top:10px;
-	}
-	#map{
-		height:400px;
-		margin:0 auto;
-		text-align:center;
-		width:400px;
-	}
-	#error{
-		background-color:#ffcccc;
-		border:1px solid #770000;
-		border-top:none;
-		color:#770000;
-		text-align:center;
-		<%="display:none;" if params[:js] == "false" && !@map_error%>
-	}
-	.error{
-		background-color:#ffcccc;
-		border:1px solid #770000;
-		color:#770000;
-		text-align:center;
-		padding:2px;
-		max-width:450px;
-	}
-	.done{
-		background-color:#ccffcc;
-		border:1px solid #007700;
-		color:#003300;
-		text-align:center;
-		padding:2px;
-		max-width:450px;
-	}
-	strong {
-		font-weight:bold;
-	}
-	h3 {
-		font-size:1.5em;
-		font-weight:bold;
-		text-decoration:underline;
-	}
-	ol li {
-		list-style-type:decimal;
-		margin-left:2em;
-	}
-	p,ol,h3{
-		margin-bottom:.5em;
-	}
-</style>
-<script type="text/javascript"> 
-	<!--
-	google.load("maps", "2", {"other_params":"sensor=false"});
-	var map;
-	var geocoder;
-	var marker;
-	var state = 0;
-	var mapped = 0;
+	<title>Campus Crusade Carpool Coordinator</title> 
+	<script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_MAPS2_KEY%>"></script>
 	
-	function initialize() {
-		map = new google.maps.Map2(document.getElementById("map"));
-		geocoder = new GClientGeocoder();
-		document.getElementById("error").style.display = "none";
-		document.getElementById("driver").style.display = "none";
-		document.getElementById("address").style.display = "none";
-		document.getElementById("rider_address").style.display = "none";
-		document.getElementById("driver_address").style.display = "none";
-		document.getElementById("driver_change").style.display = "none";
-		document.getElementById("arrange1").style.display = "none";
-		document.getElementById("arrange2").style.display = "none";
-		document.getElementById("map").style.display = "none";
-		document.getElementById("map_description").style.display = "none";
-		document.getElementById("submit").disabled = "disabled";
-		situation_callback();
-		special_info_callback();
-		check_address();
-	}
-	google.setOnLoadCallback(initialize);
-	
-	function situation_callback() {
-		document.getElementById("driver_address").style.display = "none";
-		document.getElementById("rider_address").style.display = "none";
-		document.getElementById("driver").style.display = "none";
-		document.getElementById("driver_change").style.display = "none";
-		if (document.getElementById("situation_drive").checked || document.getElementById("situation_ride").checked) {
-			if (document.getElementById("situation_drive").checked) {
-				document.getElementById("driver_address").style.display = "";
-				document.getElementById("driver").style.display = "";
-				document.getElementById("driver_change").style.display = "";
-			} else {
-				document.getElementById("rider_address").style.display = "";
-			}
-			document.getElementById("address").style.display = "";
-			document.getElementById("arrange1").style.display = "";
-			document.getElementById("arrange2").style.display = "";
-			state = 0;
-			if (mapped) {
-				document.getElementById("submit").disabled = "";
-			} else {
-				document.getElementById("submit").disabled = "disabled";
-			}
-		} else {
-			document.getElementById("driver").style.display = "none";
-			document.getElementById("address").style.display = "none";
-			document.getElementById("arrange1").style.display = "none";
-			document.getElementById("arrange2").style.display = "none";
-			state = 1;
-			document.getElementById("submit").disabled = "";
-		}
-	}
-	
-	function special_info_callback() {
-		if (document.getElementById("special_info_check_yes").checked) {
-			document.getElementById("special_info").style.display = "";
-		} else {
-			document.getElementById("special_info").style.display = "none";
-		}
-	}
-	
-	function check_address() {
-		document.getElementById("map").style.display = "none";
-		document.getElementById("map_description").style.display = "none";
-		var address;
-		address = (/^\d/.test(document.getElementById("address_2").value))?document.getElementById("address_2").value:document.getElementById("address_1").value;
-		address += ", "+document.getElementById("city").value+", "+document.getElementById("state").value+" "+document.getElementById("zip").value;
-		geocoder.getLatLng(address, function(latlng) {
-			if (marker) {
-				map.removeOverlay(marker);
-			}
-			if (latlng != null) {
-				document.getElementById("map").style.display = "";
-				document.getElementById("map_description").style.display = "";
-				marker = new GMarker(latlng);
-				map.addOverlay(marker);
-				map.setCenter(latlng, 15);
+	<script type="text/javascript">
+			google.load("maps", "2", {"other_params":"sensor=false"});
+			var map;
+			var geocoder;
+			var marker;
+			var state = 0;
+			var mapped = 0;
+			
+			function initialize() {
+				map = new google.maps.Map2(document.getElementById("map"));
+				geocoder = new GClientGeocoder();
 				document.getElementById("error").style.display = "none";
-				if (!state) {
+				document.getElementById("driver").style.display = "none";
+				document.getElementById("address").style.display = "none";
+				document.getElementById("rider_address").style.display = "none";
+				document.getElementById("driver_address").style.display = "none";
+				document.getElementById("driver_change").style.display = "none";
+				document.getElementById("arrange1").style.display = "none";
+				document.getElementById("arrange2").style.display = "none";
+				document.getElementById("map").style.display = "none";
+				document.getElementById("map_description").style.display = "none";
+				document.getElementById("submit").disabled = "disabled";
+				situation_callback();
+				special_info_callback();
+				check_address();
+			}
+			google.setOnLoadCallback(initialize);
+			
+			function situation_callback() {
+				document.getElementById("driver_address").style.display = "none";
+				document.getElementById("rider_address").style.display = "none";
+				document.getElementById("driver").style.display = "none";
+				document.getElementById("driver_change").style.display = "none";
+				if (document.getElementById("situation_drive").checked || document.getElementById("situation_ride").checked) {
+					if (document.getElementById("situation_drive").checked) {
+						document.getElementById("driver_address").style.display = "";
+						document.getElementById("driver").style.display = "";
+						document.getElementById("driver_change").style.display = "";
+					} else {
+						document.getElementById("rider_address").style.display = "";
+					}
+					document.getElementById("address").style.display = "";
+					document.getElementById("arrange1").style.display = "";
+					document.getElementById("arrange2").style.display = "";
+					state = 0;
+					if (mapped) {
+						document.getElementById("submit").disabled = "";
+					} else {
+						document.getElementById("submit").disabled = "disabled";
+					}
+				} else {
+					document.getElementById("driver").style.display = "none";
+					document.getElementById("address").style.display = "none";
+					document.getElementById("arrange1").style.display = "none";
+					document.getElementById("arrange2").style.display = "none";
+					state = 1;
 					document.getElementById("submit").disabled = "";
 				}
-				mapped = 1;
-			} else {
-				document.getElementById("error").style.display = "";
-				if (!state) {
+			}
+			
+			function special_info_callback() {
+				if (document.getElementById("special_info_check_yes").checked) {
+					document.getElementById("special_info").style.display = "";
+				} else {
+					document.getElementById("special_info").style.display = "none";
+				}
+			}
+			
+			function check_address() {
+				document.getElementById("map").style.display = "none";
+				document.getElementById("map_description").style.display = "none";
+				var address;
+				address = (/^\d/.test(document.getElementById("address_2").value))?document.getElementById("address_2").value:document.getElementById("address_1").value;
+				address += ", "+document.getElementById("city").value+", "+document.getElementById("state").value+" "+document.getElementById("zip").value;
+				geocoder.getLatLng(address, function(latlng) {
+					if (marker) {
+						map.removeOverlay(marker);
+					}
+					if (latlng != null) {
+						document.getElementById("map").style.display = "";
+						document.getElementById("map_description").style.display = "";
+						marker = new GMarker(latlng);
+						map.addOverlay(marker);
+						map.setCenter(latlng, 15);
+						document.getElementById("error").style.display = "none";
+						if (!state) {
+							document.getElementById("submit").disabled = "";
+						}
+						mapped = 1;
+					} else {
+						document.getElementById("error").style.display = "";
+						if (!state) {
+							document.getElementById("submit").disabled = "disabled";
+						}
+						mapped = 0;
+					}
+				});
+			}
+	</script>
+
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" />
+</style>
+	<script type="text/javascript"> 
+	<!--
+		google.load("maps", "2", {"other_params":"sensor=false"});
+		var map;
+		var geocoder;
+		var marker;
+		var state = 0;
+		var mapped = 0;
+		
+		function initialize() {
+			map = new google.maps.Map2(document.getElementById("map"));
+			geocoder = new GClientGeocoder();
+			document.getElementById("error").style.display = "none";
+			document.getElementById("driver").style.display = "none";
+			document.getElementById("address").style.display = "none";
+			document.getElementById("rider_address").style.display = "none";
+			document.getElementById("driver_address").style.display = "none";
+			document.getElementById("driver_change").style.display = "none";
+			document.getElementById("arrange1").style.display = "none";
+			document.getElementById("arrange2").style.display = "none";
+			document.getElementById("map").style.display = "none";
+			document.getElementById("map_description").style.display = "none";
+			document.getElementById("submit").disabled = "disabled";
+			situation_callback();
+			special_info_callback();
+			check_address();
+		}
+		google.setOnLoadCallback(initialize);
+		
+		function situation_callback() {
+			document.getElementById("driver_address").style.display = "none";
+			document.getElementById("rider_address").style.display = "none";
+			document.getElementById("driver").style.display = "none";
+			document.getElementById("driver_change").style.display = "none";
+			if (document.getElementById("situation_drive").checked || document.getElementById("situation_ride").checked) {
+				if (document.getElementById("situation_drive").checked) {
+					document.getElementById("driver_address").style.display = "";
+					document.getElementById("driver").style.display = "";
+					document.getElementById("driver_change").style.display = "";
+				} else {
+					document.getElementById("rider_address").style.display = "";
+				}
+				document.getElementById("address").style.display = "";
+				document.getElementById("arrange1").style.display = "";
+				document.getElementById("arrange2").style.display = "";
+				state = 0;
+				if (mapped) {
+					document.getElementById("submit").disabled = "";
+				} else {
 					document.getElementById("submit").disabled = "disabled";
 				}
-				mapped = 0;
+			} else {
+				document.getElementById("driver").style.display = "none";
+				document.getElementById("address").style.display = "none";
+				document.getElementById("arrange1").style.display = "none";
+				document.getElementById("arrange2").style.display = "none";
+				state = 1;
+				document.getElementById("submit").disabled = "";
 			}
-		});
-	}
-	//--> 
-</script>
-<noscript>
-<%='<meta http-equiv="refresh" content="0;url='+request.url+'&js=false" />' unless params[:js] == "false"%>
-</noscript>
-</head>
-<body>
-<h1>Carpool Questions</h1>
-<%='<div class="error">'+@error+'</div>' unless @error.nil?%>
-<%='<div class="done">'+@done+'</div>' unless @done.nil?%>
-<%form_tag :action => 'register_submit' do %>
-	<table>
-		<tbody id="conference">
-			<tr>
-				<th colspan="2">Conference Information</th>
-			</tr>
-			<tr>
-				<td><div class="label">Name:</div></td>
-				<td><%= @event.event_name %></td>
-			</tr>
-		</tbody>
-		<tbody id="situation">
-			<tr>
-				<th colspan="2">Which of these best describes your conference transportation situation?</th>
-			</tr>
-			<tr>
-				<td colspan="2" style="background-color:#ffff88;text-align:center;border:1px solid #ffff00;">If you can, please sign up as a driver! Drivers are almost always in short supply.</th>
-			</tr>
-			<tr>
-				<td colspan="2">
-					<%=radio_button_tag 'situation', 'ride', (params[:situation] == 'ride'), :onclick => 'situation_callback();'%> I do not have a ride and I would like one arranged for me.<br />
-					<%=radio_button_tag 'situation', 'drive', (params[:situation] == 'drive'), :onclick => 'situation_callback();'%> I plan on driving and I have room for extra people to be assigned to me.<br />
-					<!--<%=radio_button_tag 'situation', 'ride_done', (params[:situation] == 'ride_done'), :onclick => 'situation_callback();'%> I have a ride and I do not need one arranged for me.<br />
-					<%=radio_button_tag 'situation', 'drive_done', (params[:situation] == 'drive_done'), :onclick => 'situation_callback();'%> I plan on driving and I do not have extra room in my car.-->
-					<%=radio_button_tag 'situation', 'done', (params[:situation] == 'done'), :onclick => 'situation_callback();'%> I have my own ride already and cannot bring any extra people.
-				</td>
-			</tr>
-		</tbody>
-		<tbody id="driver_change">
-			<tr>
-				<th colspan="2">If there are too many drivers, would you like us to consider assigning you as a passenger?</th>
-			</tr>
-			<tr>
-				<td colspan="2">
-					<%=radio_button_tag 'change', 'yes', (params[:ride] == 'yes') %> Yes<br />
-					<%=radio_button_tag 'change', 'no', (params[:ride] == 'no') %> No
-				</td>
-			</tr>
-		</tbody>
-		<tbody id="arrange1">
-			<tr>
-				<th colspan="2">What time are you available to leave for the conference?</th>
-			</tr>
-			<tr>
-				<td colspan="2">If you need to be at the conference before a certain time, please indicate this in the special info section below.</td>
-			</tr>
-			<tr>
-				<td><label for="time">Time:</label></td>
-				<td><%= select_tag "time_hour",options_for_select({"1" => "01", "2" => "02", "3" => "03", "4" => "04", "5" => "05", "6" => "06", "7" => "07", "8" => "08", "9" => "09", "10" => "10", "11" => "11", "12" => "12"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_hour].to_i)%>:<%=select_tag "time_minute",options_for_select({"00" => "00", "15" => "15", "30" => "30", "45" => "45"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_minute].to_i)%> <%=select_tag "time_am_pm", options_for_select({"AM"=>"AM","PM"=>"PM"}.sort{|a,b| a[1] <=> b[1]}, :selected => params[:time_am_pm])%></td>
-			</tr>
-		</tbody>
+		}
 		
-		<tbody id="driver">
-			<tr>
-				<th colspan="2">How many extra spots do you have in your car?</th>
-			</tr>
-			<tr>
-				<td colspan="2">Please only list spots that are available for passengers to be assigned (i.e. not including yourself or any other spots that may already be taken in your car).</td>
-			</tr>
-			<tr>
-				<td><label for="spaces">Spaces:</label></td>
-				<td><%=text_field_tag "spaces", params[:spaces], :size => 3%><%=hidden_field_tag "spaces_count", @spaces_count%></td>
-			</tr>
-		</tbody>
-		<% if params[:js] == "false"%>
-			<tbody id="default">
+		function special_info_callback() {
+			if (document.getElementById("special_info_check_yes").checked) {
+				document.getElementById("special_info").style.display = "";
+			} else {
+				document.getElementById("special_info").style.display = "none";
+			}
+		}
+		
+		function check_address() {
+			document.getElementById("map").style.display = "none";
+			document.getElementById("map_description").style.display = "none";
+			var address;
+			address = (/^\d/.test(document.getElementById("address_2").value))?document.getElementById("address_2").value:document.getElementById("address_1").value;
+			address += ", "+document.getElementById("city").value+", "+document.getElementById("state").value+" "+document.getElementById("zip").value;
+			geocoder.getLatLng(address, function(latlng) {
+				if (marker) {
+					map.removeOverlay(marker);
+				}
+				if (latlng != null) {
+					document.getElementById("map").style.display = "";
+					document.getElementById("map_description").style.display = "";
+					marker = new GMarker(latlng);
+					map.addOverlay(marker);
+					map.setCenter(latlng, 15);
+					document.getElementById("error").style.display = "none";
+					if (!state) {
+						document.getElementById("submit").disabled = "";
+					}
+					mapped = 1;
+				} else {
+					document.getElementById("error").style.display = "";
+					if (!state) {
+						document.getElementById("submit").disabled = "disabled";
+					}
+					mapped = 0;
+				}
+			});
+		}
+	</script>
+	
+	<style type="text/css">
+		body{
+			margin:10px;
+		}
+		table{
+			margin:10px 0;
+			width:450px;
+		}
+		h1{
+			font-size:2em;
+			font-weight:bold;
+			margin-bottom:.5em;
+		}
+		label, div.label{
+			display:block;
+			font-weight:bold;
+			text-align:right;
+		}
+		td, th{
+			padding:2px;
+		}
+		th{
+			background-color:#dddddd;
+			border:1px solid #000000;
+			border-bottom:3px solid #000000;
+			font-size:1.2em;
+			font-weight:bold;
+			text-align:center;
+		}
+		#disclaimer{
+			font-size:.85em;
+			margin:10px 0;
+			max-width:800px;
+		}
+		#copyright{
+			font-size:.8em;
+			margin-top:10px;
+		}
+		#map{
+			height:400px;
+			margin:0 auto;
+			text-align:center;
+			width:400px;
+		}
+		#error{
+			background-color:#ffcccc;
+			border:1px solid #770000;
+			border-top:none;
+			color:#770000;
+			text-align:center;
+			<%="display:none;" if params[:js] == "false" && !@map_error%>
+		}
+		.error{
+			background-color:#ffcccc;
+			border:1px solid #770000;
+			color:#770000;
+			text-align:center;
+			padding:2px;
+			max-width:450px;
+		}
+		.done{
+			background-color:#ccffcc;
+			border:1px solid #007700;
+			color:#003300;
+			text-align:center;
+			padding:2px;
+			max-width:450px;
+		}
+		strong {
+			font-weight:bold;
+		}
+		h3 {
+			font-size:1.5em;
+			font-weight:bold;
+			text-decoration:underline;
+		}
+		ol li {
+			list-style-type:decimal;
+			margin-left:2em;
+		}
+		p,ol,h3{
+			margin-bottom:.5em;
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" />
+</head>
+
+<body>
+	<h1>Carpool Questions</h1>
+	<%= "<div class='error'> #{@error} </div>".html_safe unless @error.nil?%>
+	<%= "<div class='done'> #{@done} </div>".html_safe unless @done.nil?%>
+	<%= form_tag :url => 'register_submit_path' do %>
+		<table>
+			<tbody id="conference">
 				<tr>
-					<th colspan="2">Where would you like to be picked up/leave from?</th>
+					<th colspan="2">Conference Information</th>
+				</tr>
+				<tr>
+					<td><div class="label">Name:</div></td>
+					<td><%= @event.event_name %></td>
 				</tr>
 			</tbody>
-		<% else %>
-			<tbody id="rider_address">
+			<tbody id="situation">
 				<tr>
-					<th colspan="2">Where would like to be picked up?</th>
+					<th colspan="2">Which of these best describes your conference transportation situation?</th>
+				</tr>
+				<tr>
+					<td colspan="2" style="background-color:#ffff88;text-align:center;border:1px solid #ffff00;">If you can, please sign up as a driver! Drivers are almost always in short supply.</th>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<%=radio_button_tag 'situation', 'ride', (params[:situation] == 'ride'), :onclick => 'situation_callback();'%> I do not have a ride and I would like one arranged for me.<br />
+						<%=radio_button_tag 'situation', 'drive', (params[:situation] == 'drive'), :onclick => 'situation_callback();'%> I plan on driving and I have room for extra people to be assigned to me.<br />
+						<!--<%=radio_button_tag 'situation', 'ride_done', (params[:situation] == 'ride_done'), :onclick => 'situation_callback();'%> I have a ride and I do not need one arranged for me.<br />
+						<%=radio_button_tag 'situation', 'drive_done', (params[:situation] == 'drive_done'), :onclick => 'situation_callback();'%> I plan on driving and I do not have extra room in my car.-->
+						<%=radio_button_tag 'situation', 'done', (params[:situation] == 'done'), :onclick => 'situation_callback();'%> I have my own ride already and cannot bring any extra people.
+					</td>
 				</tr>
 			</tbody>
-			<tbody id="driver_address">
+			<tbody id="driver_change">
 				<tr>
-					<th colspan="2">Where will you be leaving from?</th>
+					<th colspan="2">If there are too many drivers, would you like us to consider assigning you as a passenger?</th>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<%=radio_button_tag 'change', 'yes', (params[:ride] == 'yes') %> Yes<br />
+						<%=radio_button_tag 'change', 'no', (params[:ride] == 'no') %> No
+					</td>
 				</tr>
 			</tbody>
-		<% end %>
-		<tbody id="address">
-			<tr>
-				<td colspan="2" id="error">We are unable to determine the location of this address. Please update your address.</td>
-			</tr>
-			<tr>
-				<td><label for="address_1">Address Line 1:</label></td>
-				<td><%=text_field_tag "address_1", params[:address_1], :onchange => "check_address();"%></td>
-			</tr>	
-			<tr>
-				<td><label for="address_2">Address Line 2 (Optional):</label></td>
-				<td><%=text_field_tag "address_2", (params[:address_2] if params[:address_2] != 'null'), :onchange => "check_address();"%></td>
-			</tr>
-			<tr>
-				<td><label for="city">City:</label></td>
-				<td><%=text_field_tag "city", params[:city], :onchange => "check_address();"%></td>
-			</tr>
-			<tr>
-				<td><label for="state">State:</label></td>
-				<td><%=text_field_tag "state", params[:state], :onchange => "check_address();"%></td>
-			</tr>
-			<tr>
-				<td><label for="zip">Zip:</label></td>
-				<td><%=text_field_tag "zip", params[:zip], :onchange => "check_address();"%></td>
-			</tr>
-			<tr>
-				<td id="map_description" colspan="2">Please make sure that your address is mapped correctly. If it is not mapped correctly, please change your address above.</td>
-			</tr>
-			<tr>
-				<td colspan="2">
-					<%='<div id="map"></div>' unless params[:js] == "false"%>
-				</td>
-			</tr>
-		</tbody>
-		<tbody id="arrange2">
-			<tr>
-				<th colspan="2">What is your preferred contact method if your ride situation changes?</th>
-			</tr>
-			<tr>
-				<td colspan="2">
-					(Your initial ride assignment will be by email.)<br />
-					<%=radio_button_tag "contact_method", "phone", (params[:contact_method] == 'phone')%> Phone Call<br />
-					<%=radio_button_tag "contact_method", "text",  (params[:contact_method] == 'text')%> Texting<br />
-					<%=radio_button_tag "contact_method", "email", (params[:contact_method] == 'email')%> Email
-				</td>
-			</tr>
-			<tr>
-				<th colspan="2">Is there anything special you need to tell us?</th>
-			</tr>
-			<tr>
-				<td colspan="2">This includes if you need to be at the conference at an earlier time, need to leave the conference early, or anything else that you haven't told us.</td>
-			</tr>
-			<tr>
-				<td><%=radio_button_tag 'special_info_check','yes',(!params[:special_info].nil? && !params[:special_info].empty?), :onclick => 'special_info_callback();' %>Yes</td>
-				<td><%=radio_button_tag 'special_info_check','no',(params[:special_info].nil? || params[:special_info].empty?), :onclick => 'special_info_callback();' %>No</td>
-			</tr>
-			<tr>
-				<td colspan="2"><%=text_area_tag "special_info", params[:special_info], :size => "40x5"%></td>
-			</tr>
-		</tbody>
-	</table>
-	<div id="disclaimer">
-		<h3>Acknowledgement of the Risks</h3>
-		<p>By using the Rideshare program, I accept all risks associated with participating in the Rideshare program, including, but not limited to, the following: death, sickness or injury from whatever source; loss of personal property; loss of personal information; not receiving a ride; driving a person I have not met; speeding tickets; car accidents; car maintenance problems; or any direct, indirect, incidental, special, consequential, punitive, or exemplary damages that result from use of, or inability to use, the Rideshare program.  Specifically, I agree to release Campus Crusade for Christ, Inc. (hereinafter, .CCCI.) and all Rideshare developers from any liability or responsibility for my carpooling safety and accessibility.  I am aware of the risks of participation and I choose to accept them.</p>
-		<p><strong>In short, I understand that my participation is strictly voluntary. I freely chose to participate. I will not hold CCCI or any Rideshare developer liable for any damage whatsoever.</strong></p>
-		<h3>Driver Warranties</h3>
-		<p>By indicating that I am able to drive, I warrant the following:
-			<ol>
-				<li>I have a valid state driver's license. It has never been revoked or suspended.</li>
-				<li>I have car insurance that would cover all damages to passengers in my car and other drivers on the road. It is at least the minimum required by the state.</li>
-				<li>I will comply with all driving laws.</li>
-				<li>I will drive safely and not take any risks that could jeopardize the safety of myself or passengers in my car.</li>
-				<li>I have a good faith belief that my car is in working condition and can make the round-trip drive without any major problems that could jeopardize the safety of myself or passengers in my car.</li>
-			</ol>
-		</p>
-	</div>
-	<%=submit_tag "Finish Carpool Registration", :id => "submit"%>
-<%end%>
-<!--<div id="copyright">
-	&copy;2009-2011 USCM
-</div>-->
+			<tbody id="arrange1">
+				<tr>
+					<th colspan="2">What time are you available to leave for the conference?</th>
+				</tr>
+				<tr>
+					<td colspan="2">If you need to be at the conference before a certain time, please indicate this in the special info section below.</td>
+				</tr>
+				<tr>
+					<td><label for="time">Time:</label></td>
+					<td><%= select_tag "time_hour",options_for_select({"1" => "01", "2" => "02", "3" => "03", "4" => "04", "5" => "05", "6" => "06", "7" => "07", "8" => "08", "9" => "09", "10" => "10", "11" => "11", "12" => "12"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_hour].to_i)%>:<%=select_tag "time_minute",options_for_select({"00" => "00", "15" => "15", "30" => "30", "45" => "45"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_minute].to_i)%> <%=select_tag "time_am_pm", options_for_select({"AM"=>"AM","PM"=>"PM"}.sort{|a,b| a[1] <=> b[1]}, :selected => params[:time_am_pm])%></td>
+				</tr>
+			</tbody>
+			
+			<tbody id="driver">
+				<tr>
+					<th colspan="2">How many extra spots do you have in your car?</th>
+				</tr>
+				<tr>
+					<td colspan="2">Please only list spots that are available for passengers to be assigned (i.e. not including yourself or any other spots that may already be taken in your car).</td>
+				</tr>
+				<tr>
+					<td><label for="spaces">Spaces:</label></td>
+					<td><%=text_field_tag "spaces", params[:spaces], :size => 3%><%=hidden_field_tag "spaces_count", @spaces_count%></td>
+				</tr>
+			</tbody>
+			<% if params[:js] == "false"%>
+				<tbody id="default">
+					<tr>
+						<th colspan="2">Where would you like to be picked up/leave from?</th>
+					</tr>
+				</tbody>
+			<% else %>
+				<tbody id="rider_address">
+					<tr>
+						<th colspan="2">Where would like to be picked up?</th>
+					</tr>
+				</tbody>
+				<tbody id="driver_address">
+					<tr>
+						<th colspan="2">Where will you be leaving from?</th>
+					</tr>
+				</tbody>
+			<% end %>
+			<tbody id="address">
+				<tr>
+					<td colspan="2" id="error">We are unable to determine the location of this address. Please update your address.</td>
+				</tr>
+				<tr>
+					<td><label for="address_1">Address Line 1:</label></td>
+					<td><%=text_field_tag "address_1", params[:address_1], :onchange => "check_address();"%></td>
+				</tr>	
+				<tr>
+					<td><label for="address_2">Address Line 2 (Optional):</label></td>
+					<td><%=text_field_tag "address_2", (params[:address_2] if params[:address_2] != 'null'), :onchange => "check_address();"%></td>
+				</tr>
+				<tr>
+					<td><label for="city">City:</label></td>
+					<td><%=text_field_tag "city", params[:city], :onchange => "check_address();"%></td>
+				</tr>
+				<tr>
+					<td><label for="state">State:</label></td>
+					<td><%=text_field_tag "state", params[:state], :onchange => "check_address();"%></td>
+				</tr>
+				<tr>
+					<td><label for="zip">Zip:</label></td>
+					<td><%=text_field_tag "zip", params[:zip], :onchange => "check_address();"%></td>
+				</tr>
+				<tr>
+					<td id="map_description" colspan="2">Please make sure that your address is mapped correctly. If it is not mapped correctly, please change your address above.</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<%= "<div id='map'></div>".html_safe unless params[:js] == "false"%>
+					</td>
+				</tr>
+			</tbody>
+			<tbody id="arrange2">
+				<tr>
+					<th colspan="2">What is your preferred contact method if your ride situation changes?</th>
+				</tr>
+				<tr>
+					<td colspan="2">
+						(Your initial ride assignment will be by email.)<br />
+						<%=radio_button_tag "contact_method", "phone", (params[:contact_method] == 'phone')%> Phone Call<br />
+						<%=radio_button_tag "contact_method", "text",  (params[:contact_method] == 'text')%> Texting<br />
+						<%=radio_button_tag "contact_method", "email", (params[:contact_method] == 'email')%> Email
+					</td>
+				</tr>
+				<tr>
+					<th colspan="2">Is there anything special you need to tell us?</th>
+				</tr>
+				<tr>
+					<td colspan="2">This includes if you need to be at the conference at an earlier time, need to leave the conference early, or anything else that you haven't told us.</td>
+				</tr>
+				<tr>
+					<td><%=radio_button_tag 'special_info_check','yes',(!params[:special_info].nil? && !params[:special_info].empty?), :onclick => 'special_info_callback();' %>Yes</td>
+					<td><%=radio_button_tag 'special_info_check','no',(params[:special_info].nil? || params[:special_info].empty?), :onclick => 'special_info_callback();' %>No</td>
+				</tr>
+				<tr>
+					<td colspan="2"><%=text_area_tag "special_info", params[:special_info], :size => "40x5"%></td>
+				</tr>
+			</tbody>
+		</table>
+		<div id="disclaimer">
+			<h3>Acknowledgement of the Risks</h3>
+			<p>By using the Rideshare program, I accept all risks associated with participating in the Rideshare program, including, but not limited to, the following: death, sickness or injury from whatever source; loss of personal property; loss of personal information; not receiving a ride; driving a person I have not met; speeding tickets; car accidents; car maintenance problems; or any direct, indirect, incidental, special, consequential, punitive, or exemplary damages that result from use of, or inability to use, the Rideshare program.  Specifically, I agree to release Campus Crusade for Christ, Inc. (hereinafter, .CCCI.) and all Rideshare developers from any liability or responsibility for my carpooling safety and accessibility.  I am aware of the risks of participation and I choose to accept them.</p>
+			<p><strong>In short, I understand that my participation is strictly voluntary. I freely chose to participate. I will not hold CCCI or any Rideshare developer liable for any damage whatsoever.</strong></p>
+			<h3>Driver Warranties</h3>
+			<p>By indicating that I am able to drive, I warrant the following:
+				<ol>
+					<li>I have a valid state driver's license. It has never been revoked or suspended.</li>
+					<li>I have car insurance that would cover all damages to passengers in my car and other drivers on the road. It is at least the minimum required by the state.</li>
+					<li>I will comply with all driving laws.</li>
+					<li>I will drive safely and not take any risks that could jeopardize the safety of myself or passengers in my car.</li>
+					<li>I have a good faith belief that my car is in working condition and can make the round-trip drive without any major problems that could jeopardize the safety of myself or passengers in my car.</li>
+				</ol>
+			</p>
+		</div>
+		<%= submit_tag "Finish Carpool Registration", :id => "submit" %>
+	<%end%>
 </body>
 </html>

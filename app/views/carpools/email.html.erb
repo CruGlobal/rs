@@ -1,78 +1,77 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"> 
-<head> 
-<title>Campus Crusade Carpool Coordinator</title> 
-<script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_MAPS2_KEY%>"></script>
-<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" />
-<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
+  <head> 
+    <title>Campus Crusade Carpool Coordinator</title> 
+    <script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_MAPS2_KEY%>"></script>
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" />
+  </head>
 
+  <body>
+    <a href="/carpool/report">Back</a>
+    <h1>Email Setup</h1>
+    <%= "<div class='error'> #{@error} </div>".html_safe unless @error.nil?%>
+    <%= "<div class='done'> #{@notice} </div>".html_safe unless @notice.nil?%>
 
-<style type="text/css">
-	
-</style>
-</head>
-<body>
-<a href="/carpool/report">Back</a>
-<h1>Email Setup</h1>
-<%='<div class="error">'+@error+'</div>' unless @error.nil?%>
-<%='<div class="done">'+@notice+'</div>' unless @notice.nil?%>
-<%form_tag :action => 'email_submit' do %>
-	<strong>Each participant will receive an E-Mail with the following information for the car they are assigned to:</strong><br />
-	<div class="example_email">
-		<table class="report">
-			<thead>		
-		<tr><th colspan="7"><h3 style="width:auto;background-color:#e5e5e5">John Smith</h3></th></tr>
-				<tr>
-					<th>Name</th>
-					<th>Address</th>
-					<th>Email</th>
-					<th>Phone</th>
-					<th>Contact Method</th>
-					<th>Departure Time</th>
-				</tr>
-			</thead>
-			<tbody>
-					<tr class="driver">
-						<td>John Smith</td>
-						<td>12345 Example St.<br />Beverly Hills, CA 90210</td>
-						<td>jsmith@example.com</td>
-						<td>555-555-5555</td>
-						<td>Phone</td>
-						<td>12:00 PM</td>
-					</tr>
-					<div class="rider_block">
-						<tr class="rider">
-							<td class="indent">Jane Doe</td>
-							<td>23456 Example St.<br />Beverly Hills, CA 90210</td>
-							<td>jdoe@example.com</td>
-							<td>555-555-5555</td>
-							<td>Text</td>
-							<td>1:00 PM</td>
-						</tr>
-						<tr class="rider">
-							<td class="indent">Jesus Christ</td>
-							<td>1 Throne Room<br />Heaven</td>
-							<td>jesus@heaven</td>
-							<td>555-555-5555</td>
-							<td>Phone</td>
-							<td>12:30 PM</td>
-						</tr>
-							<tr class="rider">
-								<td class="far_indent" colspan="7"><em>Special Info: </em>I'm God</td>
-							</tr>
-					</div>
-			</tbody>
-		</table>
-	</div>
-	<strong>Please enter in any additional info for registrants (the default text can be changed)</strong><br /><br />
-	<% if @event.email_content.empty? %>
-		<% @event.email_content = "Riders, please call your drivers (the top person in the table) to confirm your pickup time and location.\r\n\r\nConference Name: "+@event.event_name+"\r\nStart Date & Time: \r\nEnd Date & Time: \r\nOn Site Registration Begins/Ends: \r\nAddress: \r\nStuff to Bring: \r\nOther Instructions: \r\n" %>
-	<% end %>
-	<%=text_area_tag "content", @event.email_content, :size => "125x10"%><br />
-	<%=submit_tag "Save", :id => "submit"%> or <%=submit_tag "Send Emails", :id => "submit"%>
-<%end%>
-<!--<div id="copyright">
-	&copy;2009-2011 USCM
-</div>-->
-</body>
+    <%= form_tag :url => carpool_email_path do |f| %>
+      <strong>Each participant will receive an E-Mail with the following information for the car they are assigned to:</strong><br />
+      <div class="example_email">
+        <table class="report">
+          <thead>   
+            <tr><th colspan="7"><h3 style="width:auto;background-color:#e5e5e5">John Smith</h3></th></tr>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Contact Method</th>
+              <th>Departure Time</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="driver">
+                <td>John Smith</td>
+                <td>12345 Example St.<br />Beverly Hills, CA 90210</td>
+                <td>jsmith@example.com</td>
+                <td>555-555-5555</td>
+                <td>Phone</td>
+                <td>12:00 PM</td>
+              </tr>
+              <div class="rider_block">
+                <tr class="rider">
+                  <td class="indent">Jane Doe</td>
+                  <td>23456 Example St.<br />Beverly Hills, CA 90210</td>
+                  <td>jdoe@example.com</td>
+                  <td>555-555-5555</td>
+                  <td>Text</td>
+                  <td>1:00 PM</td>
+                </tr>
+                <tr class="rider">
+                  <td class="indent">Jesus Christ</td>
+                  <td>1 Throne Room<br />Heaven</td>
+                  <td>jesus@heaven</td>
+                  <td>555-555-5555</td>
+                  <td>Phone</td>
+                  <td>12:30 PM</td>
+                </tr>
+                  <tr class="rider">
+                    <td class="far_indent" colspan="7"><em>Special Info: </em>I'm God</td>
+                  </tr>
+              </div>
+          </tbody>
+        </table>
+      </div>
+      
+      <strong>Please enter in any additional info for registrants (the default text can be changed)</strong>
+      <br />
+      <br />
+      
+      <% if @event.email_content.empty? %>
+        <% @event.email_content = "Riders, please call your drivers (the top person in the table) to confirm your pickup time and location.\r\n\r\nConference Name: "+@event.event_name+"\r\nStart Date & Time: \r\nEnd Date & Time: \r\nOn Site Registration Begins/Ends: \r\nAddress: \r\nStuff to Bring: \r\nOther Instructions: \r\n" %>
+      <% end %>
+      <%= text_area_tag "content", @event.email_content, :size => "125x10"%>
+      <br />
+      <%= submit_tag "Save", :id => "submit" %> or <%= submit_tag "Send Emails", :id => "submit" %>
+      
+    <%end%>
+  </body>
 </html>

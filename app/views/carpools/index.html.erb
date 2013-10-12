@@ -1,71 +1,192 @@
-<!DOCTYPE html>
-
-<html>
-<body onload="<%="displayMessage('flash');" if @message%>setTimeout(updateList, 250);" onunload="GUnload()">
-
-<!-- ====================================================================== -->
-<!-- top div -->
-
-<div class="top">
-
-
-	<div class="center">
-		<div class="title">
-			<h1>Rideshare Admin</h1>
-		</div>
-	</div>
-
-	<div class="left">		
-		<table class="shown">
-			<tr>
-				<td>
-					<button onClick="$('.top .left .hidden').toggle();">
-						Legend &nbsp;&nbsp;&nbsp;<img src="/images/arrow.png" alt="arrow" />
-					</button>
-				</td>
-				<td>
-					<button onClick="location.href=http://wiki.uscm.org/download/attachments/56492347/CRS+RideShare+Feature.ppt?version=1&modificationDate=1262886674000" target="_blank">
-						Help?
-					</button>
-				</td>
-			</tr>
-		</table>
-		<table class="hidden">
-			<tr>
-				<td><img src="/images/AD.png" alt="Available Driver" /></td><td>Available Driver</td>
-				<td><img src="/images/AR.png" alt="Available Rider" /></td><td>Available Rider</td>
-				<td><img src="/images/selected.png" alt="Selected" /></td><td>Selected Driver/Rider</td>
-			</tr>
-			<tr>
-				<td><img src="/images/UD.png" alt="Unavailable Driver" /></td><td>Driver with Full Car</td>
-				<td><img src="/images/UR.png" alt="Unavailable Rider" /></td><td>Assigned Rider</td>
-				<td><img src="/images/AD_AR_UD_UR.png" alt="Available Driver, Available Rider, Unavailable Driver, Unavailable Rider" /></td><td>Location with all four types</td>
-			</tr>
-		</table>
-	</div>
-
-	<div class="right">
-		<div>
-			<a href="/carpool/report" 
-			title="This produces a printable list of all of the people organized by drivers"
-			>Printable Report</a><br/>
-			<a href="/carpool/email" 
-			title="This brings you to a page that allows you to set up an e-mail to notify everyone of their ride assignments">Email Setup</a><br/>
-			<a href="javascript:displayMessage('hidden_users');" 
-			title="This lists all of the people that are not included in RideShare, but have registered for the conference"
-			>Show Non-Participants</a>
-		</div>
-	</div>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"> 
+<head> 
+	<title>Rideshare Admin</title> 
+	<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" /> 
 	
-</div>
-
-
-<!-- ====================================================================== -->
-<!-- message area -->
-
-<div class="message"> </div>
-
+	<script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_MAPS2_KEY%>"></script>
+	<script type="text/javascript" src="/javascripts/actions.js"></script>
+	<%= javascript_include_tag "prototype", "effects" %>
+	<script type="text/javascript"> 
+	
+		google.load("maps", "2", {"other_params":"sensor=false"});
+		var map;
+		var geocoder;
+		var drivers;
+		var riders;
+		var locations;
+		var current_driver=-1;
+		var riders_done=<%=@riders_done%>;
+		var riders_size=<%=@riders.size%>;
+		var spaces=<%=@spaces%>;
+		var zIndex=9999999;
+		var icon;
+		//icons['driver']=new Array();
+		//icons['rider']=new Array();
+		
+		function initialize() {
+			map=new google.maps.Map2(document.getElementById("map"));
+			geocoder = new GClientGeocoder();
+			map.addControl(new GLargeMapControl());
+			map.enableScrollWheelZoom();
+			map.setCenter(new GLatLng(<%=@latitude_avg%>, <%=@longitude_avg%>), 11);
+			// only generate one icon, all the rest will be created by changing the image dynamically
+			icon=new GIcon(G_DEFAULT_ICON);
+			icon.image="/images/AD.png";
+			icon.shadow="/images/shadow.png";
+			icon.iconSize=new GSize(32, 32);
+			icon.shadowSize=new GSize(38, 32);
+			icon.imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
+			/*icons['driver']['available']=new GIcon(G_DEFAULT_ICON);
+			icons['driver']['available'].image="/images/available-driver.png";
+			icons['driver']['available'].shadow="/images/shadow.png";
+			icons['driver']['available'].iconSize=new GSize(32, 32);
+			icons['driver']['available'].shadowSize=new GSize(38, 32);
+			icons['driver']['available'].imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
+			icons['driver']['unavailable']=new GIcon(icons['driver']['available']);
+			icons['driver']['unavailable'].image="/images/unavailable-driver.png";
+			icons['driver']['selected']=new GIcon(icons['driver']['available']);
+			icons['driver']['selected'].image="/images/selected-driver.png";
+			icons['rider']['available']=new GIcon(icons['driver']['available']);
+			icons['rider']['available'].image="/images/available-rider.png";
+			icons['rider']['unavailable']=new GIcon(icons['driver']['available']);
+			icons['rider']['unavailable'].image="/images/unavailable-rider.png";
+			icons['rider']['selected']=new GIcon(icons['driver']['available']);
+			icons['rider']['selected'].image="/images/selected-rider.png";*/
+			drivers=new Object();
+			test=new Object();
+			<% @drivers.each do |driver| %>
+				<% i=driver.id %>
+				drivers[<%=i%>]=new Array();
+				//drivers[<%=i%>]['marker']=new GMarker(new GLatLng(<%=driver.latitude%>,<%=driver.longitude%>), {title: "<%=driver.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(driver.current_passengers_number < driver.number_passengers)?"icons['driver']['available']":"icons['driver']['unavailable']"%>});
+				//drivers[<%=i%>]['marker'].zIndex=zIndex--;
+				drivers[<%=i%>]['id']="<%=driver.id%>";
+				drivers[<%=i%>]['address1']="<%=driver.address1%>";
+				drivers[<%=i%>]['address2']="<%=driver.address2%>";
+				drivers[<%=i%>]['city']="<%=driver.city%>";
+				drivers[<%=i%>]['state']="<%=driver.state%>";
+				drivers[<%=i%>]['zip']="<%=driver.zip%>";
+				drivers[<%=i%>]['name']="<%=driver.person.full_name%>";
+				drivers[<%=i%>]['phone']="<%=driver.phone%>";
+				drivers[<%=i%>]['contact_method']="<%=driver.contact_method%>";
+				drivers[<%=i%>]['number_passengers']="<%=driver.number_passengers%>";
+				drivers[<%=i%>]['depart_time']="<%=driver.departureTime%>";
+				drivers[<%=i%>]['depart_time_nice']="<%=driver.departureTimeNice%>";
+				drivers[<%=i%>]['special_info']= "<%=driver.special_info %>";
+				drivers[<%=i%>]['show']=true;
+				drivers[<%=i%>]['riders']=new Object();
+				<% driver.rides.each do |rider| %>
+					<% if driver.id != rider.id %>
+						drivers[<%=i%>]['riders'][<%=rider.id%>]=<%=rider.id%>;
+					<% end %>
+				<% end %>
+				// ADD RIDERS FOR DRIVERS
+				/*GEvent.addListener(drivers[<%=i%>]['marker'], "infowindowbeforeclose", function() {
+					drivers[<%=i%>]['marker'].zIndex=zIndex--;
+				});
+				drivers[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('driver',<%=i%>));
+				map.addOverlay(drivers[<%=i%>]['marker']);*/
+			<% end %>
+			riders=new Object()
+			<% @riders.each do |rider| %>
+				<% i=rider.id %>
+				riders[<%=i%>]=new Array();
+				//riders[<%=i%>]['marker']=new GMarker(new GLatLng(<%=rider.latitude%>,<%=rider.longitude%>), {title: "<%=rider.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(rider.driver_ride_id == 0)?"icons['rider']['available']":"icons['rider']['unavailable']"%>});
+				//riders[<%=i%>]['marker'].zIndex=zIndex--;
+				riders[<%=i%>]['id']="<%=rider.id%>";
+				riders[<%=i%>]['driverID']="<%=rider.driver_ride_id%>";
+				riders[<%=i%>]['address1']="<%=rider.address1%>";
+				riders[<%=i%>]['address2']="<%=rider.address2%>";
+				riders[<%=i%>]['city']="<%=rider.city%>";
+				riders[<%=i%>]['state']="<%=rider.state%>";
+				riders[<%=i%>]['zip']="<%=rider.zip%>";
+				riders[<%=i%>]['name']="<%=rider.person.full_name%>";
+				riders[<%=i%>]['phone']="<%=rider.phone%>";
+				riders[<%=i%>]['contact_method']="<%=rider.contact_method%>";
+				riders[<%=i%>]['depart_time']="<%=rider.departureTime%>";
+				riders[<%=i%>]['depart_time_nice']="<%=rider.departureTimeNice%>";
+				riders[<%=i%>]['special_info']= "<%=rider.special_info %>";
+				riders[<%=i%>]['show']=true;
+				/*GEvent.addListener(riders[<%=i%>]['marker'], "infowindowbeforeclose", function() {
+					riders[<%=i%>]['marker'].zIndex=zIndex--;
+				});
+				riders[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('rider',<%=i%>));
+				map.addOverlay(riders[<%=i%>]['marker']);*/
+			<% end %>
+			locations= <%= @locations.to_json.html_safe %>;
+			for (var i in locations) {
+				var title="";
+				var comma=false;
+				for (var j=0;j<locations[i]['rides'].length;j++) {
+					var k=locations[i]['rides'][j]['id'];
+					if (comma) {
+						title+=", ";
+					} else {
+						comma=true;
+					}
+					if (locations[i]['rides'][j]['type'] == "driver") {
+						title+=drivers[k]['name'];
+					} else {
+						title+=riders[k]['name'];
+					}
+				}
+				locations[i]['marker']=new GMarker(new GLatLng(locations[i]['latitude'], locations[i]['longitude']), {title: title, zIndexProcess: doZIndex, icon: icon});
+				locations[i]['marker'].zIndex=zIndex--;
+				for (var j=0;j<locations[i]['rides'].length;j++) {
+					var k=locations[i]['rides'][j]['id'];
+					if (locations[i]['rides'][j]['type'] == "driver") {
+						drivers[k]['marker']=locations[i]['marker'];
+						drivers[k]['location']=i;
+					} else {
+						riders[k]['marker']=locations[i]['marker'];
+						riders[k]['location']=i;
+					}
+				}
+				map.addOverlay(locations[i]['marker']);
+			}
+			<% @locations.each do |key, value| %>
+				GEvent.addListener(locations['<%=key%>']['marker'], "infowindowbeforeclose", function() {
+					locations['<%=key%>']['marker'].zIndex=zIndex--;
+					//show['<%=key%>']=locations['<%=key%>']['rides'][0]['id']; // Causes a bug with empty windows when the first one is hidden
+				});
+				GEvent.addListener(locations['<%=key%>']['marker'], "infowindowopen", function() {
+					onMarkerOpen('<%=key%>');
+				});
+				GEvent.addListener(locations['<%=key%>']['marker'], "dblclick", function() {
+					double_click_location('<%=key%>');
+				});
+			<% end %>
+			updateMarkers();
+		}
+		google.setOnLoadCallback(initialize);
+	</script>
+</head> 
+<body onload="<%="displayMessage('flash');" if @message%>setTimeout(updateList, 250);" onunload="GUnload()">
+<div id="size_box"></div>
+<table style="position:absolute;top:5px;left:5px;height:25px;">
+	<tr>
+		<td style="padding:2px 10px;border:1px solid #000000;"><a href="javascript:showHide('legend');">Legend <img src="/images/arrow.png" alt="arrow" /></a></td>
+		<td style="padding:2px 10px;border:1px solid #000000;"><a href="http://wiki.uscm.org/display/CG/Conference+Registration+System+Ride+Share+Tool" target="_blank">Help?</a></td>
+	</tr>
+</table>
+<table id="legend" style="display:none;">
+	<tr>
+		<td><img src="/images/AD.png" alt="Available Driver" /></td>
+		<td>Available Driver</td>
+		<td><img src="/images/AR.png" alt="Available Rider" /></td>
+		<td>Available Rider</td>
+		<td><img src="/images/selected.png" alt="Selected" /></td>
+		<td>Selected Driver/Rider</td>
+	</tr>
+	<tr>
+		<td><img src="/images/UD.png" alt="Unavailable Driver" /></td>
+		<td>Driver with Full Car</td>
+		<td><img src="/images/UR.png" alt="Unavailable Rider" /></td>
+		<td>Assigned Rider</td>
+		<td><img src="/images/AD_AR_UD_UR.png" alt="Available Driver, Available Rider, Unavailable Driver, Unavailable Rider" /></td>
+		<td>Location with all four types</td>
+	</tr>
+</table>
 <div id="message_block"></div>
 <div id="flash_message" class="message" style="width:600px;height:360px;">
 	<% if @help_rides.size > 0 %>
@@ -75,7 +196,7 @@
 		<% form_tag :action => :update_addresses do %>
 			<% i=0; %>
 			<% @help_rides.each do |ride| %>
-				<h4><%= ride.person.full_name%></h4>
+				<h4><%=ride.person.full_name%></h4>
 				<%= hidden_field :ride, :id, :name => "ride[#{i}][id]" %>
 				<table>
 					<tr><td><%= label :ride, :address1, "Address Line 1" %>:&nbsp;</td><td><%= text_field :ride, :address1, :name => "ride[#{i}][address1]" %></td></tr>
@@ -91,13 +212,11 @@
 	<% end %>
 	<a href="javascript:hideMessage('flash');" class="message_exit" onmouseclick="hideMessage('flash');">X</a>
 </div>
-
-
 <div id="hidden_users_message" class="message">
 	<h2>Registrants not Participating in Rideshare</h2>
 	<% i=0 %>
 	<% @hidden_rides.each do |ride| %>
-		<a href="/carpool/register/<%= ride.id %>"><%= ride.person.full_name%></a><br />
+		<a href="/carpool/register/<%=ride.id%>"><%=ride.person.full_name%></a><br />
 		<% i=i+1 %>
 	<% end %>
 	<%="There are no users who do not need a ride." if i == 0%>
@@ -108,452 +227,105 @@
 		<% form_tag :url => {:action => :update_address}, :success => 'updateAddressCallback(request)', :failure => 'alert("Failed to update address.")', :remote => true do %>	
 			<input type="hidden" name="rideID" id="update_address_rideID" />
 			<table>
-				<tr>
-					<td>
-						<label for="update_address_address1">Address Line 1</label>:&nbsp;
-					</td>
-					<td>
-						<input type="text" name="address1" id="update_address_address1" size="30" />
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<label for="update_address_address2">Address Line 2</label>:&nbsp;
-					</td>
-					<td>
-						<input type="text" name="address2" id="update_address_address2" size="30" />
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<label for="update_address_city">City</label>:&nbsp;</td><td><input type="text" name="city" id="update_address_city" size="30" />
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<label for="update_address_state">State</label>:&nbsp;
-					</td>
-						<td>
-							<input type="text" name="state" id="update_address_state" size="2" />
-						</td>
-					</tr>
-				<tr>
-					<td>
-						<label for="update_address_zip">Zip</label>:&nbsp;</td><td><input type="text" name="zip" id="update_address_zip" size="5" />
-					</td>
-				</tr>
+				<tr><td><label for="update_address_address1">Address Line 1</label>:&nbsp;</td><td><input type="text" name="address1" id="update_address_address1" size="30" /></td></tr>
+				<tr><td><label for="update_address_address2">Address Line 2</label>:&nbsp;</td><td><input type="text" name="address2" id="update_address_address2" size="30" /></td></tr>
+				<tr><td><label for="update_address_city">City</label>:&nbsp;</td><td><input type="text" name="city" id="update_address_city" size="30" /></td></tr>
+				<tr><td><label for="update_address_state">State</label>:&nbsp;</td><td><input type="text" name="state" id="update_address_state" size="2" /></td></tr>
+				<tr><td><label for="update_address_zip">Zip</label>:&nbsp;</td><td><input type="text" name="zip" id="update_address_zip" size="5" /></td></tr>
 			</table>
 			<button onclick="hideMessage('update_address');">Cancel</button> <%= submit_tag %>
 		<% end %>
 	<a href="javascript:hideMessage('update_address');" class="message_exit" onmouseclick="hideMessage('update_address');">X</a>
 </div>
-
-
-<!-- ====================================================================== -->
-<!-- help messages -->
-
-<div class="message">
-	<div id="how_select_driver">
-		<h2>Selecting a Driver</h2>
-		To "Select" a driver, click on their name in the list or icon (green) on the map. Click the "Select Driver" link in the pop-up bubble to begin assigning riders to the driver. To assign a rider, click their name/icon and click "Add to Car". To assign riders to a different car, select a different driver using the same method.
-		
-		<!-- comment_here 
-		<a href="javascript:hideMessage('driver_help');" class="message_exit" onmouseclick="hideMessage('driver_help');">X</a>
-		-->
-
-	</div>
-	<div id="where_did_they_go">
-		<h2>Where did they go?</h2>
-		By default, only people who need attention are visible (i.e. drivers with empty spaces and riders with no ride), while people who don't need attention are hidden (i.e. drivers with full cars and riders with a ride). The "Show and Hide" link on the bottom left contains options for changing which riders/drivers are displayed. Similarly, people will be displayed based on departure time by using the "Departure Time" link below the lists - all departure times are shown by default.
-		<a href="javascript:hideMessage('filters_help');" class="message_exit" onmouseclick="hideMessage('filters_help');">X</a>
-	</div>	
+<div id="driver_help_message" class="message">
+	<h2>Selecting a Driver</h2>
+	To "Select" a driver, click on their name in the list or icon (green) on the map. Click the "Select Driver" link in the pop-up bubble to begin assigning riders to the driver. To assign a rider, click their name/icon and click "Add to Car". To assign riders to a different car, select a different driver using the same method.
+	<a href="javascript:hideMessage('driver_help');" class="message_exit" onmouseclick="hideMessage('driver_help');">X</a>
 </div>
-
-
-
-<!-- ====================================================================== -->
-<!-- google map -->
-
-<script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_MAPS2_KEY%>"></script>
-<script type="text/javascript"> 
-		
-	google.load("maps", "2", {"other_params":"sensor=false"});
-	var map;
-	var geocoder;
-	var drivers;
-	var riders;
-	var locations;
-	var current_driver = -1;
-	var riders_done = <%= @riders_done %>;
-	var riders_size = <%= @riders.size %>;
-	var spaces = <%= @spaces %>;
-	var zIndex = 9999999;
-	var icon;
-	//icons['driver']=new Array();
-	//icons['rider']=new Array();
-	
-	function initialize() {
-		map = new google.maps.Map2(document.getElementById("map"));
-		geocoder = new GClientGeocoder();
-		map.addControl(new GLargeMapControl());
-		map.enableScrollWheelZoom();
-		map.setCenter(new GLatLng( <%= @latitude_avg %>, <%= @longitude_avg %>), 11);
-		// only generate one icon, all the rest will be created by changing the image dynamically
-		icon=new GIcon(G_DEFAULT_ICON);
-		icon.image="/images/AD.png";
-		icon.shadow="/images/shadow.png";
-		icon.iconSize=new GSize(32, 32);
-		icon.shadowSize=new GSize(38, 32);
-		icon.imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
-		/*icons['driver']['available']=new GIcon(G_DEFAULT_ICON);
-		icons['driver']['available'].image="/images/available-driver.png";
-		icons['driver']['available'].shadow="/images/shadow.png";
-		icons['driver']['available'].iconSize=new GSize(32, 32);
-		icons['driver']['available'].shadowSize=new GSize(38, 32);
-		icons['driver']['available'].imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
-		icons['driver']['unavailable']=new GIcon(icons['driver']['available']);
-		icons['driver']['unavailable'].image="/images/unavailable-driver.png";
-		icons['driver']['selected']=new GIcon(icons['driver']['available']);
-		icons['driver']['selected'].image="/images/selected-driver.png";
-		icons['rider']['available']=new GIcon(icons['driver']['available']);
-		icons['rider']['available'].image="/images/available-rider.png";
-		icons['rider']['unavailable']=new GIcon(icons['driver']['available']);
-		icons['rider']['unavailable'].image="/images/unavailable-rider.png";
-		icons['rider']['selected']=new GIcon(icons['driver']['available']);
-		icons['rider']['selected'].image="/images/selected-rider.png";*/
-		drivers = new Object();
-		test = new Object();
+<div id="filters_help_message" class="message">
+	<h2>Where did they go?</h2>
+	By default, only people who need attention are visible (i.e. drivers with empty spaces and riders with no ride), while people who don't need attention are hidden (i.e. drivers with full cars and riders with a ride). The "Show and Hide" link on the bottom left contains options for changing which riders/drivers are displayed. Similarly, people will be displayed based on departure time by using the "Departure Time" link below the lists - all departure times are shown by default.
+	<a href="javascript:hideMessage('filters_help');" class="message_exit" onmouseclick="hideMessage('filters_help');">X</a>
+</div>
+<h1 id="header" style="margin-left:auto;margin-right:auto;text-align:center;">Rideshare Admin</h1>
+<div style="position:absolute;top:5px;right:5px;">
+	<a href="/carpool/report" title="This produces a printable list of all of the people organized by drivers">Printable Report</a><br />
+	<a href="/carpool/email" title="This brings you to a page that allows you to set up an e-mail to notify everyone of their ride assignments">Email Setup</a><br />
+	<a href="javascript:displayMessage('hidden_users');" title="This lists all of the people that are not included in RideShare, but have registered for the conference">Show Non-Participants</a>
+</div>
+<div id="map" style="position:absolute;left:504px;right:5px;top:100px;bottom:30px;"></div>
+<h3 id="drivers_header" style="position:absolute;left:5px;top:100px;padding:2px;border:1px solid #000000;"><%=@drivers.size%> Drivers - <span id="spaces_remaining"><%=@spaces-@riders_done%></span>/<%=@spaces%> Seats</h3>
+<div id="drivers_none" style="position:absolute;left:5px;top:129px;padding:2px;border:1px solid #000000;background-color:#ffbbbb;text-align:center;width:240px;"><strong>No Driver Selected</strong><br /><a href="javascript:displayMessage('driver_help');"><strong>How do I select a driver?</strong></a></div>
+<div id="drivers" style="position:absolute;left:5px;top:175px;bottom:40px;width:244px;border:1px solid #000000;overflow:auto;">
+	<ul id="selected_driver" style="display:none;">
+		<!-- Will be filled with current driver automagically -->
+	</ul>
+	<ul>
 		<% @drivers.each do |driver| %>
-			<% i = driver.id %>
-			drivers[<%= i %>] = new Array();
-
-			//drivers[<%=i%>]['marker']=new GMarker(new GLatLng(<%=driver.latitude%>,<%=driver.longitude%>), {title: "<%=driver.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(driver.numbercurrentpassengers.to_i < driver.number_passengers)?"icons['driver']['available']":"icons['driver']['unavailable']"%>});
-			//drivers[<%=i%>]['marker'].zIndex=zIndex--;
-			
-			drivers[<%=i%>]['id']="<%=driver.id%>";
-			drivers[<%=i%>]['address1']="<%=driver.address1%>";
-			drivers[<%=i%>]['address2']="<%=driver.address2%>";
-			drivers[<%=i%>]['city']="<%=driver.city%>";
-			drivers[<%=i%>]['state']="<%=driver.state%>";
-			drivers[<%=i%>]['zip']="<%=driver.zip%>";
-			drivers[<%=i%>]['name']="<%=driver.person.full_name%>";
-			drivers[<%=i%>]['phone']="<%=driver.phone%>";
-			drivers[<%=i%>]['contact_method']="<%=driver.contact_method%>";
-			drivers[<%=i%>]['number_passengers']="<%=driver.number_passengers%>";
-			drivers[<%=i%>]['depart_time']="<%=driver.departureTime%>";
-			drivers[<%=i%>]['depart_time_nice']="<%=driver.departureTimeNice%>";
-			drivers[<%=i%>]['special_info']=<%=driver.special_info.to_json%>;
-			drivers[<%=i%>]['show']=true;
-			drivers[<%=i%>]['riders']=new Object();
-			<% driver.rides.each do |rider| %>
-				<% if driver.id != rider.id %>
-					drivers[<%=i%>]['riders'][<%=rider.id%>]=<%=rider.id%>;
-				<% end %>
-			<% end %>
-			// ADD RIDERS FOR DRIVERS
-			/*GEvent.addListener(drivers[<%=i%>]['marker'], "infowindowbeforeclose", function() {
-				drivers[<%=i%>]['marker'].zIndex=zIndex--;
-			});
-			drivers[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('driver',<%=i%>));
-			map.addOverlay(drivers[<%=i%>]['marker']);*/
+			<li id="driver<%=driver.id%>"><a href="javascript:map.setCenter(drivers[<%=driver.id%>]['marker'].getLatLng(), 14);showMarker(drivers[<%=driver.id%>]['location'], <%=driver.id%>);" ondblclick="double_click_driver(<%=driver.id%>);return false;"><%= driver.person.full_name %></a> (<%= driver.current_passengers_number %>/<%= driver.number_passengers %>)</li>
 		<% end %>
-		riders=new Object()
+	</ul>
+	<div style="padding:2px;margin-top:20px;">
+		<a href="javascript:displayMessage('filters_help');"><strong>Where did they go?</strong></a>
+	</div>
+</div>
+<h3 id="riders_header" style="position:absolute;left:255px;top:100px;padding:2px;border:1px solid #000000;"><%=@riders.size%> Riders - (<span id="riders_remaining"><%=@riders.size - @riders_done%></span> Unassigned)</h3>
+<div id="riders" style="position:absolute;left:255px;top:129px;bottom:40px;width:244px;border:1px solid #000000;overflow:auto;">
+	<ul id="selected_riders" style="display:none;">
+		<!-- Will be filled with riders automagically -->
+	</ul>
+	<ul>
 		<% @riders.each do |rider| %>
-			<% i=rider.id %>
-			riders[<%=i%>]=new Array();
-			//riders[<%=i%>]['marker']=new GMarker(new GLatLng(<%=rider.latitude%>,<%=rider.longitude%>), {title: "<%=rider.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(rider.driver_ride_id == 0)?"icons['rider']['available']":"icons['rider']['unavailable']"%>});
-			//riders[<%=i%>]['marker'].zIndex=zIndex--;
-			riders[<%=i%>]['id']="<%=rider.id%>";
-			riders[<%=i%>]['driverID']="<%=rider.driver_ride_id%>";
-			riders[<%=i%>]['address1']="<%=rider.address1%>";
-			riders[<%=i%>]['address2']="<%=rider.address2%>";
-			riders[<%=i%>]['city']="<%=rider.city%>";
-			riders[<%=i%>]['state']="<%=rider.state%>";
-			riders[<%=i%>]['zip']="<%=rider.zip%>";
-			riders[<%=i%>]['name']="<%=rider.person.full_name%>";
-			riders[<%=i%>]['phone']="<%=rider.phone%>";
-			riders[<%=i%>]['contact_method']="<%=rider.contact_method%>";
-			riders[<%=i%>]['depart_time']="<%=rider.departureTime%>";
-			riders[<%=i%>]['depart_time_nice']="<%=rider.departureTimeNice%>";
-			riders[<%=i%>]['special_info']=<%=rider.special_info.to_json%>;
-			riders[<%=i%>]['show']=true;
-			/*GEvent.addListener(riders[<%=i%>]['marker'], "infowindowbeforeclose", function() {
-				riders[<%=i%>]['marker'].zIndex=zIndex--;
-			});
-			riders[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('rider',<%=i%>));
-			map.addOverlay(riders[<%=i%>]['marker']);*/
+			<li id="rider<%=rider.id%>"><%='<img src="/images/check.png" alt="Done" title="This person has already been assigned." />'.html_safe if rider.driver_ride_id != 0%><a href="javascript:map.setCenter(riders[<%=rider.id%>]['marker'].getLatLng(), 14);showMarker(riders[<%=rider.id%>]['location'], <%=rider.id%>);" ondblclick="double_click_rider(<%=rider.id%>);return false;"><%= rider.person.full_name %></a> (<%= rider.city %>)</li>
 		<% end %>
-		locations=<%=@locations.to_json%>;
-		for (var i in locations) {
-			var title="";
-			var comma=false;
-			for (var j=0;j<locations[i]['rides'].length;j++) {
-				var k=locations[i]['rides'][j]['id'];
-				if (comma) {
-					title+=", ";
-				} else {
-					comma=true;
-				}
-				if (locations[i]['rides'][j]['type'] == "driver") {
-					title+=drivers[k]['name'];
-				} else {
-					title+=riders[k]['name'];
-				}
-			}
-			locations[i]['marker']=new GMarker(new GLatLng(locations[i]['latitude'], locations[i]['longitude']), {title: title, zIndexProcess: doZIndex, icon: icon});
-			locations[i]['marker'].zIndex=zIndex--;
-			for (var j=0;j<locations[i]['rides'].length;j++) {
-				var k=locations[i]['rides'][j]['id'];
-				if (locations[i]['rides'][j]['type'] == "driver") {
-					drivers[k]['marker']=locations[i]['marker'];
-					drivers[k]['location']=i;
-				} else {
-					riders[k]['marker']=locations[i]['marker'];
-					riders[k]['location']=i;
-				}
-			}
-			map.addOverlay(locations[i]['marker']);
-		}
-		<% @locations.each do |key, value| %>
-			GEvent.addListener(locations['<%=key%>']['marker'], "infowindowbeforeclose", function() {
-				locations['<%=key%>']['marker'].zIndex=zIndex--;
-				//show['<%=key%>']=locations['<%=key%>']['rides'][0]['id']; // Causes a bug with empty windows when the first one is hidden
-			});
-			GEvent.addListener(locations['<%=key%>']['marker'], "infowindowopen", function() {
-				onMarkerOpen('<%=key%>');
-			});
-			GEvent.addListener(locations['<%=key%>']['marker'], "dblclick", function() {
-				double_click_location('<%=key%>');
-			});
-		<% end %>
-		updateMarkers();
-	}
-	google.setOnLoadCallback(initialize);
-
-</script>
-
-
-<div id="map"> google map here </div>
-
-
-<!-- ====================================================================== -->
-<!-- driver table -->
-
-<div id="leftheader">
-	<h3 class="title">
-		<%=@drivers.size%> Drivers - <span id="spaces_remaining"><%=@spaces-@riders_done%></span>/<%=@spaces%> Seats
-	</h3>
-	<p class="text">
-		<button onClick="$('.message #test').toggle();"><strong>How do I select a driver?</strong></button><br/>
-		<strong>No Driver Selected</strong><br/>
-	</p>
-</div>
-
-<div class="drivers">
-	<div class="table" >
-		<ul id="selected_driver">
-			<!-- Will be filled with current driver automagically -->
-		</ul>
-		<ul>
-			<% @drivers.each do |driver| %>
-				<li id="driver<%=driver.id%>">
-					<a href="javascript:map.setCenter(drivers[<%=driver.id%>]['marker'].getLatLng(), 14);showMarker(drivers[<%=driver.id%>]['location'], <%=driver.id%>);" ondblclick="double_click_driver(<%=driver.id%>);return false;"><%= driver.person.full_name %>
-					</a> (<%= driver.numbercurrentpassengers %>/<%= driver.number_passengers %>)
-				</li>
-			<% end %>
-		</ul>
-		<div style="padding:2px;margin-top:20px;">
-			<a href="javascript:displayMessage('filters_help');"><strong>Where did they go?</strong></a>
-		</div>
+	</ul>
+	<div style="padding:2px;margin-top:20px;">
+		<a href="javascript:displayMessage('filters_help');"><strong>Where did they go?</strong></a>
 	</div>
 </div>
-
-<!-- ====================================================================== -->
-<!-- rider table -->
-
-<div id="rightheader">
-	<h3 class="title">
-		<%=@riders.size%> Riders - (<span id="riders_remaining"><%=@riders.size - @riders_done%></span> Unassigned)
-	</h3>
-	<p class="title">
-		<button onClick="$('#filters_help_message').toggle();"><strong>Where did they go?</strong></button>
-	</p>
-</div>
-
-<div class="riders">
-	<div class="table">
-		<ul id="selected_riders">
-			<!-- Will be filled with riders automagically -->
-		</ul>
-		<ul>
-			<% @riders.each do |rider| %>
-				<li id="rider<%=rider.id%>">
-					<%='<img src="/images/check.png" alt="Done" title="This person has already been assigned." />' if rider.driver_ride_id != 0%>
-					<a href="javascript:map.setCenter(riders[<%=rider.id%>]['marker'].getLatLng(), 14);showMarker(riders[<%=rider.id%>]['location'], <%=rider.id%>);" ondblclick="double_click_rider(<%=rider.id%>);return false;"><%= rider.person.full_name %></a> 
-					(<%= rider.city %>)
-				</li>
-			<% end %>
-		</ul>
-	</div>
-</div>
-
-
-
-
-<!-- ====================================================================== -->
-<!-- options and filtering table -->
-
-<div class="options">
-
-
-	<!-- ====================================================================== -->
-	<!-- EARLIEST // LATEST -->
-
-	<div class="departure_time">
-			
+<div id="options_box_departure_time" style="position:absolute;z-index:100;left:5px;bottom:37px;border:1px solid #000000;border-bottom:none;width:429px;height:60px;background-color:#ffffff;display:none;">
+	<form action="javascript:updateDepartureTime();">
 		<table class="room">
 			<tr>
-				<th class="title" colspan="2">Earliest</th>
-				<th class="title" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest</th>
-				<th class="button" ><button onClick="$('.departure_time').hide();">&nbsp;X&nbsp;</button></th>
+				<th colspan="2">Earliest</th>
+				<th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latest</th>
+				<th><a href="javascript:closeDepartureTime();">X</a></th>
 			</tr>
 			<tr>
-				<td><img src="images/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;
-					
-					<select name="options_box_departure_time_time1_hour" 
-									id="options_box_departure_time_time1_hour" 
-									onchange="updateDepartureTime1(true);">
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-					</select>
-					
-					<select name="options_box_departure_time_time1_minute" 
-									id="options_box_departure_time_time1_minute" 
-									onChange="updateDepartureTime1(true);">
-						<option value="00">00</option>
-						<option value="15">15</option>
-						<option value="30">30</option>
-						<option value="45">45</option>
-					</select>
-				
-					<select name="options_box_departure_time_time1_ampm" 
-									id="options_box_departure_time_time1_ampm" 
-									onchange="updateDepartureTime1(true);">
-						<option value="0">AM</option>
-						<option value="12">PM</option>
-					</select>
-				</td>
-				
-
-				<td>
-					<input 	type="checkbox"
-									name="options_box_departure_time_use1"
-									id="options_box_departure_time_use1"
-									onclick="updateDepartureTime1(false);"
-									/>
-				</td>
-				
-				<td><img 	src="images/clock-icon.png" 
-									alt="clock" 
-									style="width:25px;height:25px;" />&nbsp;
-					<select name="options_box_departure_time_time2_hour" 
-									id="options_box_departure_time_time2_hour" 
-									onchange="updateDepartureTime2(true);">
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-					</select>
-					<select name="options_box_departure_time_time2_minute" 
-									id="options_box_departure_time_time2_minute" 
-									onChange="updateDepartureTime2(true);">
-						<option value="00">00</option>
-						<option value="15">15</option>
-						<option value="30">30</option>
-						<option value="45">45</option>
-					</select>
-					<select name="options_box_departure_time_time2_ampm" 
-									id="options_box_departure_time_time2_ampm" 
-									onchange="updateDepartureTime2(true);">
-						<option value="0">AM</option>
-						<option value="12">PM</option>
-					</select>
-				</td>
-				<td>
-					<input type="checkbox" 
-					name="options_box_departure_time_use2" 
-					id="options_box_departure_time_use2" 
-					onclick="updateDepartureTime2(false);" />
-				</td>
+				<td><img src="images/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;<select name="options_box_departure_time_time1_hour" id="options_box_departure_time_time1_hour" onchange="updateDepartureTime1(true);"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select name="options_box_departure_time_time1_minute" id="options_box_departure_time_time1_minute" onChange="updateDepartureTime1(true);"><option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select><select name="options_box_departure_time_time1_ampm" id="options_box_departure_time_time1_ampm" onchange="updateDepartureTime1(true);"><option value="0">AM</option><option value="12">PM</option></select></td>
+				<td><input type="checkbox" name="options_box_departure_time_use1" id="options_box_departure_time_use1" onclick="updateDepartureTime1(false);" /></td>
+				<td><img src="images/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;<select name="options_box_departure_time_time2_hour" id="options_box_departure_time_time2_hour" onchange="updateDepartureTime2(true);"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select name="options_box_departure_time_time2_minute" id="options_box_departure_time_time2_minute" onChange="updateDepartureTime2(true);"><option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select><select name="options_box_departure_time_time2_ampm" id="options_box_departure_time_time2_ampm" onchange="updateDepartureTime2(true);"><option value="0">AM</option><option value="12">PM</option></select></td>
+				<td><input type="checkbox" name="options_box_departure_time_use2" id="options_box_departure_time_use2" onclick="updateDepartureTime2(false);" /></td>
 			</tr>
 		</table>
-	</div>
-
-	<!-- ====================================================================== -->
-	<!-- SHOW AND HIDE -->
-
-	<!-- TODO FIX SHOW AND HIDE -->
-
-	<div class="showhide">
-		<table>
+	</form>
+</div>
+<div id="options_box_availability" style="position:absolute;z-index:100;left:253px;bottom:37px;border:1px solid #000000;border-bottom:none;width:246px;height:115px;background-color:#ffffff;display:none;">
+	<form action="javascript:updateAvailability();">
+		<table class="room">
 			<tr>
-				<th>Filtering Options</th>
-				<th><button onClick="$('.showhide').hide();">&nbsp;X&nbsp;</button></th>
+				<th>Show and Hide</th>
+				<th><a href="javascript:closeAvailability();">X</a></th>
 			</tr>
 			<tr>
 				<td>Show riders without a ride and drivers with open seats:</td>
-				<td><input type="checkbox" 
-										name="options_box_availability_available" 
-										id="options_box_availability_available" 
-										checked="checked" 
-										onClick="updateList();" /></td>
+				<td><input type="checkbox" name="options_box_availability_available" id="options_box_availability_available" checked="checked" onclick="updateList();" /></td>
 			</tr>
 			<tr>
 				<td>Show riders with a ride and drivers with a full car:</td>
-				<td><input 	type="checkbox" 
-										name="options_box_availability_assigned" 
-										id="options_box_availability_assigned" 
-										onClick="updateList();" /></td>
+				<td><input type="checkbox" name="options_box_availability_assigned" id="options_box_availability_assigned" onclick="updateList();" /></td>
 			</tr>
 		</table>
-	</div>
-
-	<!-- ====================================================================== -->
-	<!-- FOUNDATION TABLE -->
-
-	<div class="foundation">
-		<table>
-			<tr>
-				<td class="left"><button onClick="$('.departure_time').toggle();">Departure Time <img src="/images/up_arrow.png" alt="arrow" /></button></td>
-				<td class="right"><button onClick="$('.showhide').toggle();">Filter Options<img src="/images/up_arrow.png" alt="arrow"/></button>
-				</td>
-			</tr>
-		</table>
-	</div>
-
-<!-- ====================================================================== -->
-<!-- end of options table -->
+	</form>
 </div>
-
-
-
-</body>
+<!--<div id="options" >-->
+	<table id="options" class="room" style="position:absolute;left:6px;bottom:5px;width:495px;height:30px;">
+		<tr>
+			<td id="options_departure_time"><a href="javascript:showOption('departure_time');">Departure Time <img src="/images/up_arrow.png" alt="arrow" /></a></td>
+			<td id="options_availability" style="background-color:#bbffbb;"><a href="javascript:showOption('availability');">Show and Hide <img src="/images/up_arrow.png" alt="arrow" style="height:12px;width:12px;vertical-align:middle;" /></a></td>
+		</tr>
+	</table>
+<!--</div>-->
+<!--<div id="copyright" style="position:absolute;left:504px;bottom:5px;right:5px;height:17px;border:1px solid #000000;padding:2px;font-size:13px;text-align:center;">&copy;2009-2011 USCM</div>-->
+</body> 
 </html> 

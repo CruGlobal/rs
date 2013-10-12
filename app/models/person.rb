@@ -1,16 +1,17 @@
 class Person < ActiveRecord::Base 
-  has_many :rides, :foreign_key => "fk_personID"
-  set_table_name   "ministry_person"
-  set_primary_key  "personID"
+  self.table_name = "ministry_person"
+  self.primary_key = "personID"
+  
+  has_many                :rides, :foreign_key => "fk_personID"
   
   belongs_to              :user, :foreign_key => "fk_ssmUserId"  #Link it to SSM
 
   has_one                 :staff
 
   # Addresses
-  has_one                 :current_address, :foreign_key => "fk_PersonID", :conditions => "addressType = 'current'", :class_name => 'Address'
-  has_one                 :permanent_address, :foreign_key => "fk_PersonID", :conditions => "addressType = 'permanent'", :class_name => 'Address'
-  has_one                 :emergency_address1, :foreign_key => "fk_PersonID", :conditions => "addressType = 'emergency1'", :class_name => 'Address'
+  has_one                 :current_address, -> { where :addressType => 'current' }, :foreign_key => "fk_PersonID", :class_name => 'Address'
+  has_one                 :permanent_address, -> { where :addressType => 'permanent' }, :foreign_key => "fk_PersonID", :class_name => 'Address'
+  has_one                 :emergency_address1, -> { where :addressType => 'emergency1' }, :foreign_key => "fk_PersonID", :class_name => 'Address'
   has_many                :addresses, :foreign_key => "fk_PersonID" 
   
   

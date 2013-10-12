@@ -9,7 +9,14 @@
 //
 // WARNING: THE FIRST BLANK LINE MARKS THE END OF WHAT'S TO BE PROCESSED, ANY BLANK LINE SHOULD
 // GO AFTER THE REQUIRES BELOW.
-//
+// 
+// Rideshare App Notes ---------------------------------------------------------
+// We manually require the following javascript libraries 
+// since some libraries depdend on other libraries.
+// -----------------------------------------------------------------------------
+// 
 //= require jquery
 //= require jquery_ujs
+//= require prototype
+//= require effects
 //= require_tree .

@@ -34,10 +34,11 @@
 #
 
 class Address < ActiveRecord::Base
-  set_table_name        "ministry_newaddress"
-  set_primary_key       "addressID"
+  self.table_name   = "ministry_newaddress"
+  self.primary_key  = "addressID"
   
-  belongs_to :person, :foreign_key => "fk_PersonID"
+  belongs_to :person, 
+    :foreign_key => "fk_PersonID"
   
   before_save :stamp
   

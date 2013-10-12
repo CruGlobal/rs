@@ -3,7 +3,6 @@
 <head> 
 <title>Carpool Report</title>
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" /> 
-<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" /> 
 </head>
 <body id="report">
 <a href="/<%=session[:event_id] %>">Back</a>
@@ -11,46 +10,46 @@
 <h1>Report</h1>
 <h2>Drivers and Their Cars</h2>
 <% @drivers.select {|v| v.event_id == session[:event_local_id]  and v.rides.size != 0}.sort {|a,b| a.person.reverse_name <=> b.person.reverse_name }.each do |driver| %>
-<div class="report_table">
-<table class="report">
-	<thead>		
-<tr><th colspan="7"><h3 style="width:auto;background-color:#e5e5e5"><%=driver.person.full_name%></h3></th></tr>
-		<tr>
-			<th>Name</th>
-			<th>Address</th>
-			<th>Email</th>
-			<th>Phone</th>
-			<th>Contact Method</th>
-			<th>Departure Time</th>
-		</tr>
-	</thead>
-	<tbody>
+	<div class="report_table">
+	<table class="report">
+		<thead>		
+			<tr><th colspan="7"><h3 style="width:auto;background-color:#e5e5e5"><%=driver.person.full_name%></h3></th></tr>
+			<tr>
+				<th>Name</th>
+				<th>Address</th>
+				<th>Email</th>
+				<th>Phone</th>
+				<th>Contact Method</th>
+				<th>Departure Time</th>
+			</tr>
+		</thead>
+		<tbody>
 			<tr class="driver">
-				<td><%=driver.person.full_name%></td>
-				<td><%=driver.address%></td>
-				<td><%=driver.email%></td>
-				<td><%=driver.phone%></td>
-				<td><%=driver.contact_method%></td>
-				<td><%=driver.departureTimeNice%></td>
+				<td><%= driver.person.full_name.html_safe %></td>
+				<td><%= driver.address.html_safe %></td>
+				<td><%= driver.email.html_safe %></td>
+				<td><%= driver.phone.html_safe %></td>
+				<td><%= driver.contact_method.html_safe %></td>
+				<td><%= driver.departureTimeNice.html_safe %></td>
 			</tr>
 			<% if driver.special_info != '' %>
 				<tr class="rider">
-					<td class="far_indent" colspan="7"><em>Special Info: </em><%=driver.special_info%></td>
+					<td class="far_indent" colspan="7"><em>Special Info: </em><%= driver.special_info.html_safe %></td>
 				</tr>
 			<% end %>
 			<div class="rider_block">
 			<% driver.rides.sort {|a,b| a.person.reverse_name <=> b.person.reverse_name}.each do |rider| %>
 				<tr class="rider">
-					<td class="indent"><%=rider.person.full_name%></td>
-					<td><%=rider.address%></td>
-					<td><%=rider.email%></td>
-					<td><%=rider.phone%></td>
-					<td><%=rider.contact_method%></td>
-					<td><%=rider.departureTimeNice%></td>
+					<td class="indent"><%= rider.person.full_name.html_safe %></td>
+					<td><%= rider.address.html_safe %></td>
+					<td><%= rider.email.html_safe %></td>
+					<td><%= rider.phone.html_safe %></td>
+					<td><%= rider.contact_method.html_safe %></td>
+					<td><%= rider.departureTimeNice.html_safe %></td>
 				</tr>
 				<% if rider.special_info != '' %>
 					<tr class="rider">
-						<td class="far_indent" colspan="7"><em>Special Info: </em><%=rider.special_info%></td>
+						<td class="far_indent" colspan="7"><em>Special Info: </em><%= rider.special_info.html_safe %></td>
 					</tr>
 				<% end %>
 			<% end %>
@@ -76,16 +75,16 @@
 	<tbody>
 		<% @drivers.select {|v| v.event_id == session[:event_local_id]  and v.rides.size == 0}.sort {|a,b| a.person.reverse_name <=> b.person.reverse_name}.each do |driver| %>
 			<tr class="driver">
-				<td><%=driver.person.full_name%></td>
-				<td><%=driver.address%></td>
-				<td><%=driver.email%></td>
-				<td><%=driver.phone%></td>
-				<td><%=driver.contact_method%></td>
-				<td><%=driver.departureTimeNice%></td>
+				<td><%= driver.person.full_name.html_safe %></td>
+				<td><%= driver.address.html_safe %></td>
+				<td><%= driver.email.html_safe %></td>
+				<td><%= driver.phone.html_safe %></td>
+				<td><%= driver.contact_method.html_safe %></td>
+				<td><%= driver.departureTimeNice.html_safe %></td>
 			</tr>
 			<% if driver.special_info != '' %>
 				<tr class="rider">
-					<td class="far_indent" colspan="7"><em>Special Info: </em><%=driver.special_info%></td>
+					<td class="far_indent" colspan="7"><em>Special Info: </em><%= driver.special_info.html_safe %></td>
 				</tr>
 			<% end %>
 		<% end %>
@@ -110,12 +109,12 @@
 			<% @unassigned_riders.sort {|a, b| a.person.reverse_name <=> b.person.reverse_name}.each do |rider| %>
 			<% if rider.event_id == session[:event_local_id]  %>
 				<tr>
-					<td><%=rider.person.full_name%></td>
-					<td><%=rider.address%></td>
-					<td><%=rider.email%></td>
-					<td><%=rider.phone%></td>
-					<td><%=rider.contact_method%></td>
-					<td><%=rider.departureTimeNice%></td>
+					<td><%= rider.person.full_name.html_safe %></td>
+					<td><%= rider.address.html_safe %></td>
+					<td><%= rider.email.html_safe %></td>
+					<td><%= rider.phone.html_safe %></td>
+					<td><%= rider.contact_method.html_safe %></td>
+					<td><%= rider.departureTimeNice.html_safe %></td>
 				</tr>
 				<% if rider.special_info != '' %>
 					<tr>
