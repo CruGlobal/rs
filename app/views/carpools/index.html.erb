@@ -5,8 +5,7 @@
 	<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" /> 
 	
 	<script type="text/javascript" src="http://www.google.com/jsapi?key=<%=GOOGLE_MAPS2_KEY%>"></script>
-	<script type="text/javascript" src="/javascripts/actions.js"></script>
-	<%= javascript_include_tag "prototype", "effects" %>
+	<%= javascript_include_tag "application", "data-turbolinks-track" => true %>
 	<script type="text/javascript"> 
 	
 		google.load("maps", "2", {"other_params":"sensor=false"});
@@ -32,27 +31,27 @@
 			map.setCenter(new GLatLng(<%=@latitude_avg%>, <%=@longitude_avg%>), 11);
 			// only generate one icon, all the rest will be created by changing the image dynamically
 			icon=new GIcon(G_DEFAULT_ICON);
-			icon.image="/images/AD.png";
-			icon.shadow="/images/shadow.png";
+			icon.image="/assets/AD.png";
+			icon.shadow="/assets/shadow.png";
 			icon.iconSize=new GSize(32, 32);
 			icon.shadowSize=new GSize(38, 32);
 			icon.imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
 			/*icons['driver']['available']=new GIcon(G_DEFAULT_ICON);
-			icons['driver']['available'].image="/images/available-driver.png";
-			icons['driver']['available'].shadow="/images/shadow.png";
+			icons['driver']['available'].image="/assets/available-driver.png";
+			icons['driver']['available'].shadow="/assets/shadow.png";
 			icons['driver']['available'].iconSize=new GSize(32, 32);
 			icons['driver']['available'].shadowSize=new GSize(38, 32);
 			icons['driver']['available'].imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
 			icons['driver']['unavailable']=new GIcon(icons['driver']['available']);
-			icons['driver']['unavailable'].image="/images/unavailable-driver.png";
+			icons['driver']['unavailable'].image="/assets/unavailable-driver.png";
 			icons['driver']['selected']=new GIcon(icons['driver']['available']);
-			icons['driver']['selected'].image="/images/selected-driver.png";
+			icons['driver']['selected'].image="/assets/selected-driver.png";
 			icons['rider']['available']=new GIcon(icons['driver']['available']);
-			icons['rider']['available'].image="/images/available-rider.png";
+			icons['rider']['available'].image="/assets/available-rider.png";
 			icons['rider']['unavailable']=new GIcon(icons['driver']['available']);
-			icons['rider']['unavailable'].image="/images/unavailable-rider.png";
+			icons['rider']['unavailable'].image="/assets/unavailable-rider.png";
 			icons['rider']['selected']=new GIcon(icons['driver']['available']);
-			icons['rider']['selected'].image="/images/selected-rider.png";*/
+			icons['rider']['selected'].image="/assets/selected-rider.png";*/
 			drivers=new Object();
 			test=new Object();
 			<% @drivers.each do |driver| %>
@@ -165,25 +164,25 @@
 <div id="size_box"></div>
 <table style="position:absolute;top:5px;left:5px;height:25px;">
 	<tr>
-		<td style="padding:2px 10px;border:1px solid #000000;"><a href="javascript:showHide('legend');">Legend <img src="/images/arrow.png" alt="arrow" /></a></td>
+		<td style="padding:2px 10px;border:1px solid #000000;"><a href="javascript:showHide('legend');">Legend <img src="/assets/arrow.png" alt="arrow" /></a></td>
 		<td style="padding:2px 10px;border:1px solid #000000;"><a href="http://wiki.uscm.org/display/CG/Conference+Registration+System+Ride+Share+Tool" target="_blank">Help?</a></td>
 	</tr>
 </table>
 <table id="legend" style="display:none;">
 	<tr>
-		<td><img src="/images/AD.png" alt="Available Driver" /></td>
+		<td><img src="/assets/AD.png" alt="Available Driver" /></td>
 		<td>Available Driver</td>
-		<td><img src="/images/AR.png" alt="Available Rider" /></td>
+		<td><img src="/assets/AR.png" alt="Available Rider" /></td>
 		<td>Available Rider</td>
-		<td><img src="/images/selected.png" alt="Selected" /></td>
+		<td><img src="/assets/selected.png" alt="Selected" /></td>
 		<td>Selected Driver/Rider</td>
 	</tr>
 	<tr>
-		<td><img src="/images/UD.png" alt="Unavailable Driver" /></td>
+		<td><img src="/assets/UD.png" alt="Unavailable Driver" /></td>
 		<td>Driver with Full Car</td>
-		<td><img src="/images/UR.png" alt="Unavailable Rider" /></td>
+		<td><img src="/assets/UR.png" alt="Unavailable Rider" /></td>
 		<td>Assigned Rider</td>
-		<td><img src="/images/AD_AR_UD_UR.png" alt="Available Driver, Available Rider, Unavailable Driver, Unavailable Rider" /></td>
+		<td><img src="/assets/AD_AR_UD_UR.png" alt="Available Driver, Available Rider, Unavailable Driver, Unavailable Rider" /></td>
 		<td>Location with all four types</td>
 	</tr>
 </table>
@@ -276,7 +275,7 @@
 	</ul>
 	<ul>
 		<% @riders.each do |rider| %>
-			<li id="rider<%=rider.id%>"><%='<img src="/images/check.png" alt="Done" title="This person has already been assigned." />'.html_safe if rider.driver_ride_id != 0%><a href="javascript:map.setCenter(riders[<%=rider.id%>]['marker'].getLatLng(), 14);showMarker(riders[<%=rider.id%>]['location'], <%=rider.id%>);" ondblclick="double_click_rider(<%=rider.id%>);return false;"><%= rider.person.full_name %></a> (<%= rider.city %>)</li>
+			<li id="rider<%=rider.id%>"><%='<img src="/assets/check.png" alt="Done" title="This person has already been assigned." />'.html_safe if rider.driver_ride_id != 0%><a href="javascript:map.setCenter(riders[<%=rider.id%>]['marker'].getLatLng(), 14);showMarker(riders[<%=rider.id%>]['location'], <%=rider.id%>);" ondblclick="double_click_rider(<%=rider.id%>);return false;"><%= rider.person.full_name %></a> (<%= rider.city %>)</li>
 		<% end %>
 	</ul>
 	<div style="padding:2px;margin-top:20px;">
@@ -292,9 +291,9 @@
 				<th><a href="javascript:closeDepartureTime();">X</a></th>
 			</tr>
 			<tr>
-				<td><img src="images/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;<select name="options_box_departure_time_time1_hour" id="options_box_departure_time_time1_hour" onchange="updateDepartureTime1(true);"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select name="options_box_departure_time_time1_minute" id="options_box_departure_time_time1_minute" onChange="updateDepartureTime1(true);"><option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select><select name="options_box_departure_time_time1_ampm" id="options_box_departure_time_time1_ampm" onchange="updateDepartureTime1(true);"><option value="0">AM</option><option value="12">PM</option></select></td>
+				<td><img src="/assets/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;<select name="options_box_departure_time_time1_hour" id="options_box_departure_time_time1_hour" onchange="updateDepartureTime1(true);"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select name="options_box_departure_time_time1_minute" id="options_box_departure_time_time1_minute" onChange="updateDepartureTime1(true);"><option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select><select name="options_box_departure_time_time1_ampm" id="options_box_departure_time_time1_ampm" onchange="updateDepartureTime1(true);"><option value="0">AM</option><option value="12">PM</option></select></td>
 				<td><input type="checkbox" name="options_box_departure_time_use1" id="options_box_departure_time_use1" onclick="updateDepartureTime1(false);" /></td>
-				<td><img src="images/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;<select name="options_box_departure_time_time2_hour" id="options_box_departure_time_time2_hour" onchange="updateDepartureTime2(true);"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select name="options_box_departure_time_time2_minute" id="options_box_departure_time_time2_minute" onChange="updateDepartureTime2(true);"><option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select><select name="options_box_departure_time_time2_ampm" id="options_box_departure_time_time2_ampm" onchange="updateDepartureTime2(true);"><option value="0">AM</option><option value="12">PM</option></select></td>
+				<td><img src="/assets/clock-icon.png" alt="clock" style="width:25px;height:25px;" />&nbsp;<select name="options_box_departure_time_time2_hour" id="options_box_departure_time_time2_hour" onchange="updateDepartureTime2(true);"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select name="options_box_departure_time_time2_minute" id="options_box_departure_time_time2_minute" onChange="updateDepartureTime2(true);"><option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select><select name="options_box_departure_time_time2_ampm" id="options_box_departure_time_time2_ampm" onchange="updateDepartureTime2(true);"><option value="0">AM</option><option value="12">PM</option></select></td>
 				<td><input type="checkbox" name="options_box_departure_time_use2" id="options_box_departure_time_use2" onclick="updateDepartureTime2(false);" /></td>
 			</tr>
 		</table>
@@ -321,8 +320,8 @@
 <!--<div id="options" >-->
 	<table id="options" class="room" style="position:absolute;left:6px;bottom:5px;width:495px;height:30px;">
 		<tr>
-			<td id="options_departure_time"><a href="javascript:showOption('departure_time');">Departure Time <img src="/images/up_arrow.png" alt="arrow" /></a></td>
-			<td id="options_availability" style="background-color:#bbffbb;"><a href="javascript:showOption('availability');">Show and Hide <img src="/images/up_arrow.png" alt="arrow" style="height:12px;width:12px;vertical-align:middle;" /></a></td>
+			<td id="options_departure_time"><a href="javascript:showOption('departure_time');">Departure Time <img src="/assets/up_arrow.png" alt="arrow" /></a></td>
+			<td id="options_availability" style="background-color:#bbffbb;"><a href="javascript:showOption('availability');">Show and Hide <img src="/assets/up_arrow.png" alt="arrow" style="height:12px;width:12px;vertical-align:middle;" /></a></td>
 		</tr>
 	</table>
 <!--</div>-->

@@ -55,19 +55,19 @@
 	function getIcon(type, i) {
 		if (type == "driver") {
 			if (current_driver == i) {
-				return "/images/S_AD.png";
+				return "/assets/S_AD.png";
 			} else if (numProperties(drivers[i]['riders']) < drivers[i]['number_passengers']) {
-				return "/images/AD.png";
+				return "/assets/AD.png";
 			} else {
-				return "/images/UD.png";
+				return "/assets/UD.png";
 			}
 		} else {
 			if (current_driver == riders[i]['driverID']) {
-				return "/images/S_AR.png";
+				return "/assets/S_AR.png";
 			} else if (riders[i]['driverID'] == 0) {
-				return "/images/AR.png";
+				return "/assets/AR.png";
 			} else {
-				return "/images/UR.png";
+				return "/assets/UR.png";
 			}
 		}
 	}
@@ -129,7 +129,7 @@
 			}
 			
 			if (image != '') {
-				locations[i]['marker'].setImage("/images/"+image.substring(0, image.length-1)+".png");
+				locations[i]['marker'].setImage("/assets/"+image.substring(0, image.length-1)+".png");
 			}
 			locations[i]['marker'].bindInfoWindowHtml(getMarkerHTML(i), {'maxWidth': 400, 'maxHeight':300, 'autoScroll':true});
 			var k;
@@ -706,7 +706,7 @@
 						riders[i]['driverID']=j;
 						riders[i]['marker'].closeInfoWindow();
 						var img=document.createElement("img");
-						img.src="images/check.png";
+						img.src="assets/check.png";
 						img.alt="Done";
 						img.title="This person has already been assigned."
 						prependChild(document.getElementById("rider"+i), img);

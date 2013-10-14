@@ -208,7 +208,7 @@ class Person < ActiveRecord::Base
   # file_column picture
   def pic(size = "mini")
     if image.nil?
-      "/images/nophoto_" + size + ".gif"
+      "/assets/nophoto_" + size + ".gif"
     else
       url_for_file_column(self, "image", size)
     end
@@ -252,9 +252,9 @@ class Person < ActiveRecord::Base
   # Find an exact match by email
   def self.find_exact(person, address)
     # try by address first
-    person = Person.find(:first, :conditions => ["email = ?", address.email], :include => :current_address)
+    person = Person.where("email = ?", address.email).includes(:current_address).first
     # then try by username
-    person ||= Person.find(:first, :conditions => ["username = ?", address.email], :include => :user)
+    person ||= Person.where("username = ?", address.email).includes(:user)
     return person
   end
 
