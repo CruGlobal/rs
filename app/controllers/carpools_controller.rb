@@ -39,7 +39,7 @@ class CarpoolsController < ApplicationController
         if !@locations.has_key?(location)
           @locations[location]={:latitude => driver.latitude, :longitude => driver.longitude, :rides => Array.new}
         end
-        if (driver.latitude != 0 && driver.longitude != 0)
+        if (driver.latitude && driver.latitude != 0 && driver.longitude && driver.longitude != 0)
           @latitude_avg+=driver.latitude
           @longitude_avg+=driver.longitude
           count+=1
