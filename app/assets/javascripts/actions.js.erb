@@ -55,19 +55,19 @@
 	function getIcon(type, i) {
 		if (type == "driver") {
 			if (current_driver == i) {
-				return "/assets/S_AD.png";
+				return "<%= asset_path('S_AD.png') %>";
 			} else if (numProperties(drivers[i]['riders']) < drivers[i]['number_passengers']) {
-				return "/assets/AD.png";
+				return "<%= asset_path('AD.png') %>";
 			} else {
-				return "/assets/UD.png";
+				return "<%= asset_path('UD.png') %>";
 			}
 		} else {
 			if (current_driver == riders[i]['driverID']) {
-				return "/assets/S_AR.png";
+				return "<%= asset_path('S_AR.png') %>";
 			} else if (riders[i]['driverID'] == 0) {
-				return "/assets/AR.png";
+				return "<%= asset_path('AR.png') %>";
 			} else {
-				return "/assets/UR.png";
+				return "<%= asset_path('UR.png') %>";
 			}
 		}
 	}
@@ -127,8 +127,8 @@
 			if (UR) {
 				image+='UR_';
 			}
-			
 			if (image != '') {
+				// TODO not sure how to make this dynamic asset work with asset pipeline
 				locations[i]['marker'].setImage("/assets/"+image.substring(0, image.length-1)+".png");
 			}
 			locations[i]['marker'].bindInfoWindowHtml(getMarkerHTML(i), {'maxWidth': 400, 'maxHeight':300, 'autoScroll':true});
@@ -706,7 +706,7 @@
 						riders[i]['driverID']=j;
 						riders[i]['marker'].closeInfoWindow();
 						var img=document.createElement("img");
-						img.src="assets/check.png";
+						img.src="<%= asset_path('check.png')%>";
 						img.alt="Done";
 						img.title="This person has already been assigned."
 						prependChild(document.getElementById("rider"+i), img);
