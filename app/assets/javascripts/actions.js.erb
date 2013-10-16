@@ -129,7 +129,7 @@
 			}
 			if (image != '') {
 				// TODO not sure how to make this dynamic asset work with asset pipeline
-				locations[i]['marker'].setImage("/assets/"+image.substring(0, image.length-1)+".png");
+				locations[i]['marker'].setImage("/carpool/icons/"+image.substring(0, image.length-1)+".png");
 			}
 			locations[i]['marker'].bindInfoWindowHtml(getMarkerHTML(i), {'maxWidth': 400, 'maxHeight':300, 'autoScroll':true});
 			var k;
