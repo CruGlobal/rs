@@ -19,5 +19,5 @@ public/stylesheets
 /tmp
 vendor/ruby
 config/settings.local.yml
-database.yml
+config/database.yml
 .idea

@@ -2,163 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
 	<title>Rideshare Admin</title>
-	<%= stylesheet_link_tag "reset-min" %>
+  <%= stylesheet_link_tag "application", :media => "all" %>
 
-	<script type="text/javascript" src="//www.google.com/jsapi?key=<%= Rails.configuration.google_maps2_key %>"></script>
+  <%= javascript_include_tag "//www.google.com/jsapi?key=#{Rails.configuration.google_maps2_key}" %>
 	<%= javascript_include_tag "application", "data-turbolinks-track" => true %>
-	<script type="text/javascript">
-
-		google.load("maps", "2", {"other_params":"sensor=false"});
-		var map;
-		var geocoder;
-		var drivers;
-		var riders;
-		var locations;
-		var current_driver=-1;
-		var riders_done=<%=@riders_done%>;
-		var riders_size=<%=@riders.size%>;
-		var spaces=<%=@spaces%>;
-		var zIndex=9999999;
-		var icon;
-		//icons['driver']=new Array();
-		//icons['rider']=new Array();
-
-		function initialize() {
-			map=new google.maps.Map2(document.getElementById("map"));
-			geocoder = new GClientGeocoder();
-			map.addControl(new GLargeMapControl());
-			map.enableScrollWheelZoom();
-			map.setCenter(new GLatLng(<%=@latitude_avg%>, <%=@longitude_avg%>), 11);
-			// only generate one icon, all the rest will be created by changing the image dynamically
-			icon=new GIcon(G_DEFAULT_ICON);
-			icon.image="<%= asset_path "AD.png" %>";
-			icon.shadow="<%= asset_path "shadow.png" %>";
-			icon.iconSize=new GSize(32, 32);
-			icon.shadowSize=new GSize(38, 32);
-			icon.imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
-			/*icons['driver']['available']=new GIcon(G_DEFAULT_ICON);
-			icons['driver']['available'].image="/assets/available-driver.png";
-			icons['driver']['available'].shadow="/assets/shadow.png";
-			icons['driver']['available'].iconSize=new GSize(32, 32);
-			icons['driver']['available'].shadowSize=new GSize(38, 32);
-			icons['driver']['available'].imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
-			icons['driver']['unavailable']=new GIcon(icons['driver']['available']);
-			icons['driver']['unavailable'].image="/assets/unavailable-driver.png";
-			icons['driver']['selected']=new GIcon(icons['driver']['available']);
-			icons['driver']['selected'].image="/assets/selected-driver.png";
-			icons['rider']['available']=new GIcon(icons['driver']['available']);
-			icons['rider']['available'].image="/assets/available-rider.png";
-			icons['rider']['unavailable']=new GIcon(icons['driver']['available']);
-			icons['rider']['unavailable'].image="/assets/unavailable-rider.png";
-			icons['rider']['selected']=new GIcon(icons['driver']['available']);
-			icons['rider']['selected'].image="/assets/selected-rider.png";*/
-			drivers=new Object();
-			test=new Object();
-			<% @drivers.each do |driver| %>
-				<% i=driver.id %>
-				drivers[<%=i%>]=new Array();
-				//drivers[<%=i%>]['marker']=new GMarker(new GLatLng(<%=driver.latitude%>,<%=driver.longitude%>), {title: "<%=driver.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(driver.current_passengers_number < driver.number_passengers)?"icons['driver']['available']":"icons['driver']['unavailable']"%>});
-				//drivers[<%=i%>]['marker'].zIndex=zIndex--;
-				drivers[<%=i%>]['id']="<%=driver.id%>";
-				drivers[<%=i%>]['address1']="<%= j(driver.address1) %>";
-				drivers[<%=i%>]['address2']="<%= j(driver.address2) %>";
-				drivers[<%=i%>]['city']="<%=driver.city%>";
-				drivers[<%=i%>]['state']="<%=driver.state%>";
-				drivers[<%=i%>]['zip']="<%=driver.zip%>";
-				drivers[<%=i%>]['name']="<%= j(driver.person.full_name) %>";
-				drivers[<%=i%>]['phone']="<%=driver.phone%>";
-				drivers[<%=i%>]['contact_method']="<%=driver.contact_method%>";
-				drivers[<%=i%>]['number_passengers']="<%=driver.number_passengers%>";
-				drivers[<%=i%>]['depart_time']="<%=driver.departureTime%>";
-				drivers[<%=i%>]['depart_time_nice']="<%=driver.departureTimeNice%>";
-				drivers[<%=i%>]['special_info']= "<%= j(driver.special_info.to_s.strip) %>";
-				drivers[<%=i%>]['show']=true;
-				drivers[<%=i%>]['riders']=new Object();
-				<% driver.rides.each do |rider| %>
-					<% if driver.id != rider.id %>
-						drivers[<%=i%>]['riders'][<%=rider.id%>]=<%=rider.id%>;
-					<% end %>
-				<% end %>
-				// ADD RIDERS FOR DRIVERS
-				/*GEvent.addListener(drivers[<%=i%>]['marker'], "infowindowbeforeclose", function() {
-					drivers[<%=i%>]['marker'].zIndex=zIndex--;
-				});
-				drivers[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('driver',<%=i%>));
-				map.addOverlay(drivers[<%=i%>]['marker']);*/
-			<% end %>
-			riders=new Object()
-			<% @riders.each do |rider| %>
-				<% i=rider.id %>
-				riders[<%=i%>]=new Array();
-				//riders[<%=i%>]['marker']=new GMarker(new GLatLng(<%=rider.latitude%>,<%=rider.longitude%>), {title: "<%=rider.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(rider.driver_ride_id == 0)?"icons['rider']['available']":"icons['rider']['unavailable']"%>});
-				//riders[<%=i%>]['marker'].zIndex=zIndex--;
-				riders[<%=i%>]['id']="<%=rider.id%>";
-				riders[<%=i%>]['driverID']="<%=rider.driver_ride_id%>";
-				riders[<%=i%>]['address1']="<%= j(rider.address1) %>";
-				riders[<%=i%>]['address2']="<%=rider.address2%>";
-				riders[<%=i%>]['city']="<%=rider.city%>";
-				riders[<%=i%>]['state']="<%=rider.state%>";
-				riders[<%=i%>]['zip']="<%=rider.zip%>";
-				riders[<%=i%>]['name']="<%=j(rider.person.full_name)%>";
-				riders[<%=i%>]['phone']="<%=rider.phone%>";
-				riders[<%=i%>]['contact_method']="<%=rider.contact_method%>";
-				riders[<%=i%>]['depart_time']="<%=rider.departureTime%>";
-				riders[<%=i%>]['depart_time_nice']="<%=j(rider.departureTimeNice)%>";
-				riders[<%=i%>]['special_info']= "<%=j(rider.special_info.to_s.strip) %>";
-				riders[<%=i%>]['show']=true;
-				/*GEvent.addListener(riders[<%=i%>]['marker'], "infowindowbeforeclose", function() {
-					riders[<%=i%>]['marker'].zIndex=zIndex--;
-				});
-				riders[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('rider',<%=i%>));
-				map.addOverlay(riders[<%=i%>]['marker']);*/
-			<% end %>
-			locations= <%= @locations.to_json.html_safe %>;
-			for (var i in locations) {
-				var title="";
-				var comma=false;
-				for (var j=0;j<locations[i]['rides'].length;j++) {
-					var k=locations[i]['rides'][j]['id'];
-					if (comma) {
-						title+=", ";
-					} else {
-						comma=true;
-					}
-					if (locations[i]['rides'][j]['type'] == "driver") {
-						title+=drivers[k]['name'];
-					} else {
-						title+=riders[k]['name'];
-					}
-				}
-				locations[i]['marker']=new GMarker(new GLatLng(locations[i]['latitude'], locations[i]['longitude']), {title: title, zIndexProcess: doZIndex, icon: icon});
-				locations[i]['marker'].zIndex=zIndex--;
-				for (var j=0;j<locations[i]['rides'].length;j++) {
-					var k=locations[i]['rides'][j]['id'];
-					if (locations[i]['rides'][j]['type'] == "driver") {
-						drivers[k]['marker']=locations[i]['marker'];
-						drivers[k]['location']=i;
-					} else {
-						riders[k]['marker']=locations[i]['marker'];
-						riders[k]['location']=i;
-					}
-				}
-				map.addOverlay(locations[i]['marker']);
-			}
-			<% @locations.each do |key, value| %>
-				GEvent.addListener(locations['<%=key%>']['marker'], "infowindowbeforeclose", function() {
-					locations['<%=key%>']['marker'].zIndex=zIndex--;
-					//show['<%=key%>']=locations['<%=key%>']['rides'][0]['id']; // Causes a bug with empty windows when the first one is hidden
-				});
-				GEvent.addListener(locations['<%=key%>']['marker'], "infowindowopen", function() {
-					onMarkerOpen('<%=key%>');
-				});
-				GEvent.addListener(locations['<%=key%>']['marker'], "dblclick", function() {
-					double_click_location('<%=key%>');
-				});
-			<% end %>
-			updateMarkers();
-		}
-		google.setOnLoadCallback(initialize);
-	</script>
 </head>
 <body onload="<%="displayMessage('flash');" if @message%>setTimeout(updateList, 250);" onunload="GUnload()">
 <div id="size_box"></div>
@@ -326,5 +173,160 @@
 	</table>
 <!--</div>-->
 <!--<div id="copyright" style="position:absolute;left:504px;bottom:5px;right:5px;height:17px;border:1px solid #000000;padding:2px;font-size:13px;text-align:center;">&copy;2009-2011 USCM</div>-->
+
+
+	<script type="text/javascript">
+
+		google.load("maps", "2", {"other_params":"sensor=false"});
+		var map;
+		var geocoder;
+		var drivers;
+		var riders;
+		var locations;
+		var current_driver=-1;
+		var riders_done=<%=@riders_done%>;
+		var riders_size=<%=@riders.size%>;
+		var spaces=<%=@spaces%>;
+		var zIndex=9999999;
+		var icon;
+		//icons['driver']=new Array();
+		//icons['rider']=new Array();
+
+		function initialize() {
+			map=new google.maps.Map2(document.getElementById("map"));
+			geocoder = new GClientGeocoder();
+			map.addControl(new GLargeMapControl());
+			map.enableScrollWheelZoom();
+			map.setCenter(new GLatLng(<%=@latitude_avg%>, <%=@longitude_avg%>), 11);
+			// only generate one icon, all the rest will be created by changing the image dynamically
+			icon=new GIcon(G_DEFAULT_ICON);
+			icon.image="<%= asset_path "AD.png" %>";
+			icon.shadow="<%= asset_path "shadow.png" %>";
+			icon.iconSize=new GSize(32, 32);
+			icon.shadowSize=new GSize(38, 32);
+			icon.imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
+			/*icons['driver']['available']=new GIcon(G_DEFAULT_ICON);
+			icons['driver']['available'].image="/assets/available-driver.png";
+			icons['driver']['available'].shadow="/assets/shadow.png";
+			icons['driver']['available'].iconSize=new GSize(32, 32);
+			icons['driver']['available'].shadowSize=new GSize(38, 32);
+			icons['driver']['available'].imageMap=[2,10, 2,22, 10,30, 22,30, 30,22, 30,10, 22,2, 10,2];
+			icons['driver']['unavailable']=new GIcon(icons['driver']['available']);
+			icons['driver']['unavailable'].image="/assets/unavailable-driver.png";
+			icons['driver']['selected']=new GIcon(icons['driver']['available']);
+			icons['driver']['selected'].image="/assets/selected-driver.png";
+			icons['rider']['available']=new GIcon(icons['driver']['available']);
+			icons['rider']['available'].image="/assets/available-rider.png";
+			icons['rider']['unavailable']=new GIcon(icons['driver']['available']);
+			icons['rider']['unavailable'].image="/assets/unavailable-rider.png";
+			icons['rider']['selected']=new GIcon(icons['driver']['available']);
+			icons['rider']['selected'].image="/assets/selected-rider.png";*/
+			drivers=new Object();
+			test=new Object();
+			<% @drivers.each do |driver| %>
+				<% i=driver.id %>
+				drivers[<%=i%>]=new Array();
+				//drivers[<%=i%>]['marker']=new GMarker(new GLatLng(<%=driver.latitude%>,<%=driver.longitude%>), {title: "<%=driver.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(driver.current_passengers_number < driver.number_passengers)?"icons['driver']['available']":"icons['driver']['unavailable']"%>});
+				//drivers[<%=i%>]['marker'].zIndex=zIndex--;
+				drivers[<%=i%>]['id']="<%=driver.id%>";
+				drivers[<%=i%>]['address1']="<%= j(driver.address1) %>";
+				drivers[<%=i%>]['address2']="<%= j(driver.address2) %>";
+				drivers[<%=i%>]['city']="<%=driver.city%>";
+				drivers[<%=i%>]['state']="<%=driver.state%>";
+				drivers[<%=i%>]['zip']="<%=driver.zip%>";
+				drivers[<%=i%>]['name']="<%= j(driver.person.full_name) %>";
+				drivers[<%=i%>]['phone']="<%=driver.phone%>";
+				drivers[<%=i%>]['contact_method']="<%=driver.contact_method%>";
+				drivers[<%=i%>]['number_passengers']="<%=driver.number_passengers%>";
+				drivers[<%=i%>]['depart_time']="<%=driver.departureTime%>";
+				drivers[<%=i%>]['depart_time_nice']="<%=driver.departureTimeNice%>";
+				drivers[<%=i%>]['special_info']= "<%= j(driver.special_info.to_s.strip) %>";
+				drivers[<%=i%>]['show']=true;
+				drivers[<%=i%>]['riders']=new Object();
+				<% driver.rides.each do |rider| %>
+					<% if driver.id != rider.id %>
+						drivers[<%=i%>]['riders'][<%=rider.id%>]=<%=rider.id%>;
+					<% end %>
+				<% end %>
+				// ADD RIDERS FOR DRIVERS
+				/*GEvent.addListener(drivers[<%=i%>]['marker'], "infowindowbeforeclose", function() {
+					drivers[<%=i%>]['marker'].zIndex=zIndex--;
+				});
+				drivers[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('driver',<%=i%>));
+				map.addOverlay(drivers[<%=i%>]['marker']);*/
+			<% end %>
+			riders=new Object()
+			<% @riders.each do |rider| %>
+				<% i=rider.id %>
+				riders[<%=i%>]=new Array();
+				//riders[<%=i%>]['marker']=new GMarker(new GLatLng(<%=rider.latitude%>,<%=rider.longitude%>), {title: "<%=rider.person.full_name%>", zIndexProcess: doZIndex, icon: <%=(rider.driver_ride_id == 0)?"icons['rider']['available']":"icons['rider']['unavailable']"%>});
+				//riders[<%=i%>]['marker'].zIndex=zIndex--;
+				riders[<%=i%>]['id']="<%=rider.id%>";
+				riders[<%=i%>]['driverID']="<%=rider.driver_ride_id%>";
+				riders[<%=i%>]['address1']="<%= j(rider.address1) %>";
+				riders[<%=i%>]['address2']="<%=rider.address2%>";
+				riders[<%=i%>]['city']="<%=rider.city%>";
+				riders[<%=i%>]['state']="<%=rider.state%>";
+				riders[<%=i%>]['zip']="<%=rider.zip%>";
+				riders[<%=i%>]['name']="<%=j(rider.person.full_name)%>";
+				riders[<%=i%>]['phone']="<%=rider.phone%>";
+				riders[<%=i%>]['contact_method']="<%=rider.contact_method%>";
+				riders[<%=i%>]['depart_time']="<%=rider.departureTime%>";
+				riders[<%=i%>]['depart_time_nice']="<%=j(rider.departureTimeNice)%>";
+				riders[<%=i%>]['special_info']= "<%=j(rider.special_info.to_s.strip) %>";
+				riders[<%=i%>]['show']=true;
+				/*GEvent.addListener(riders[<%=i%>]['marker'], "infowindowbeforeclose", function() {
+					riders[<%=i%>]['marker'].zIndex=zIndex--;
+				});
+				riders[<%=i%>]['marker'].bindInfoWindowHtml(makeInfoboxHTML('rider',<%=i%>));
+				map.addOverlay(riders[<%=i%>]['marker']);*/
+			<% end %>
+			locations= <%= @locations.to_json.html_safe %>;
+			for (var i in locations) {
+				var title="";
+				var comma=false;
+				for (var j=0;j<locations[i]['rides'].length;j++) {
+					var k=locations[i]['rides'][j]['id'];
+					if (comma) {
+						title+=", ";
+					} else {
+						comma=true;
+					}
+					if (locations[i]['rides'][j]['type'] == "driver") {
+						title+=drivers[k]['name'];
+					} else {
+						title+=riders[k]['name'];
+					}
+				}
+				locations[i]['marker']=new GMarker(new GLatLng(locations[i]['latitude'], locations[i]['longitude']), {title: title, zIndexProcess: doZIndex, icon: icon});
+				locations[i]['marker'].zIndex=zIndex--;
+				for (var j=0;j<locations[i]['rides'].length;j++) {
+					var k=locations[i]['rides'][j]['id'];
+					if (locations[i]['rides'][j]['type'] == "driver") {
+						drivers[k]['marker']=locations[i]['marker'];
+						drivers[k]['location']=i;
+					} else {
+						riders[k]['marker']=locations[i]['marker'];
+						riders[k]['location']=i;
+					}
+				}
+				map.addOverlay(locations[i]['marker']);
+			}
+			<% @locations.each do |key, value| %>
+				GEvent.addListener(locations['<%=key%>']['marker'], "infowindowbeforeclose", function() {
+					locations['<%=key%>']['marker'].zIndex=zIndex--;
+					//show['<%=key%>']=locations['<%=key%>']['rides'][0]['id']; // Causes a bug with empty windows when the first one is hidden
+				});
+				GEvent.addListener(locations['<%=key%>']['marker'], "infowindowopen", function() {
+					onMarkerOpen('<%=key%>');
+				});
+				GEvent.addListener(locations['<%=key%>']['marker'], "dblclick", function() {
+					double_click_location('<%=key%>');
+				});
+			<% end %>
+			updateMarkers();
+		}
+		google.setOnLoadCallback(initialize);
+	</script>
 </body>
 </html>

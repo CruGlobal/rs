@@ -300,9 +300,8 @@
 	<%= "<div class='done'> #{@done} </div>".html_safe unless @done.nil?%>
 	
 	<%# conditionally route to Carpools#regiseter and Carpools#register_update  %>
-	<% url = @ride.nil? ? register_submit_path  : register_update_path(id: @ride.id) %>
-	<% method = @ride.nil? ? :post : :put %>
-	<%= form_tag(url, :method => method) do %>
+	<% url = params[:id].nil? ? register_submit_path  : register_update_path(id: params[:id]) %>
+	<%= form_tag(url) do %>
 	
 		<table>
 			<tbody id="conference">

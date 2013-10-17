@@ -187,7 +187,7 @@ class CarpoolsController < ApplicationController
       render :text => "failure"
     end
   end
-
+  
   def register_update
     # ride has already been created
     
@@ -221,42 +221,71 @@ class CarpoolsController < ApplicationController
   end
 
   def register
-    if !params[:id].nil?
+    
+    # the Ride has already been created
+    if params[:id].present?
       ride=Ride.find(params[:id])
       if session[:event_id] != ride.event.conference_id
         render :text => "" and return
       end
-      person=ride.person
-      @event=ride.event
+      person = ride.person
+      @event = ride.event
       params[:redirect]="/"+ride.event.conference_id.to_s
       session[:redirect]=params[:redirect]
       session[:event]=@event.id
       session[:personID]=person.personID
+    
+    # the Ride has not been created
     else
-      session[:personID]=params[:person_id]
-      session[:country]=params[:country]
-      session[:phone]=params[:phone]
-      session[:email]=params[:email]
-      session[:gender]=params[:gender]
+      session[:personID] = params[:person_id]
+      session[:country]  = params[:country]
+      session[:phone]    = params[:phone]
+      session[:email]    = params[:email]
+      session[:gender]   = params[:gender]
       session[:school_year]=params[:school_year]
       session[:redirect]=params[:redirect]
       session[:first_name]=params[:first_name]
       session[:last_name]=params[:last_name]
       session[:contact_method]=params[:contact_method]
+      
       person = Person.where(:personID => params[:person_id]).first
+      
       @event = Event.where(:conference_id => params[:conference_id]).first
       if @event.nil?
-        @event=Event.new(:email_content=>'',:event_name => params[:conference_name], :conference_id => params[:conference_id].to_i, :password => Digest::MD5.hexdigest(RIDESHARE_PASSWORD))
+        @event = Event.new(:email_content=>'',:event_name => params[:conference_name], :conference_id => params[:conference_id].to_i, :password => "")
         @event.save!
       end
       session[:event]=@event.id
+      
+      ride = Ride.new(:driver_ride_id => 0, 
+        :event_id => @event.id, 
+        :person_id => person.personID, 
+        :address1 => params[:address_1], 
+        :address2 => params[:address_2], 
+        :address3 => '', 
+        :address4 => '', 
+        :country => '', 
+        :city => params[:city], 
+        :state => params[:state], 
+        :zip => params[:zip], 
+        :phone => session[:phone], 
+        :contact_method => params[:contact], 
+        :number_passengers => ((params[:spaces].blank?) ? 0 : params[:spaces]), :drive_willingness => (params[:situation] == "ride") ? 0 : (params[:situation] == "drive") ? (params[:ride] == 'yes') ? 3 : 1 : 2, 
+        :depart_time => params[:time], 
+        :special_info => params[:special_info], 
+        :email => session[:email])
+      
+      coordinates = Geocoder.coordinates(ride.address_single_line)
+      ride.latitude = coordinates[0]
+      ride.longitude = coordinates[1]
+      ride.save!
     end
     if !person.nil?
       if person.first_name == params[:first_name] && person.last_name == params[:last_name] && (person.yearInSchool == params[:school_year]||(person.yearInSchool.nil?&&(params[:school_year]=="null"||params[:school_year]=="")) )
         ride = Ride.where(:person_id => person.personID, :event_id => @event.id).first
       end
       if !ride.nil?
-        params[:situation]=(ride.drive_willingness == 0)? 'ride':(ride.drive_willingness == 1 || ride.drive_willingness == 3) ? 'drive':'done'
+        params[:situation]=(ride.drive_willingness == 0)? 'ride':(ride.drive_willingness == 1 || ride.drive_willingness == 3) ? 'drive' : 'done'
         #params[:time]=(ride.drive_willingness == 2) ? nil:ride.departureTime
         params[:time]=ride.departureTime
         if !params[:time].nil?
