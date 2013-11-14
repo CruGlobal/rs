@@ -112,15 +112,9 @@ class CarpoolsController < ApplicationController
 
   def get_coordinates
     @rides = Ride.where(:latitude => 0, :longitude => 0)
-    sleep_time=1;
     @rides.each do |ride|
       address=(ride.address2 =~ /^\d/) ? ride.address2 : ride.address1
-      @status, @accuracy, @latitude, @longitude=open("http://maps.google.com/maps/geo?q="+CGI::escape(address+", "+ride.city+", "+ride.state+" "+ride.zip)+"&output=csv&sensor=false&key=" + Rails.configuration.google_maps2_key).gets.split(',')
-      sleep(sleep_time)
-      if @status == 620
-        sleep_time+=1
-        redo
-      end
+      @latitude, @longitude = Geocoder.coordinates(address+", "+ride.city+", "+ride.state+" "+ride.zip)
       ride.latitude=@latitude
       ride.longitude=@longitude
       ride.save!
@@ -138,26 +132,17 @@ class CarpoolsController < ApplicationController
   end
 
   def update_address
-    temp=Ride.find(params[:rideID])
-    temp.address1=params[:address1]
-    temp.address2=params[:address2]
-    temp.city=params[:city]
-    temp.state=params[:state]
-    temp.zip=params[:zip]
-    @status=620
-    sleep_time=0
-    while @status == 620
-      address=(temp.address2 =~ /^\d/) ? temp.address2 : temp.address1
-      @status, @accuracy, @latitude, @longitude=open("http://maps.google.com/maps/geo?q="+CGI::escape(address+", "+temp.city+", "+temp.state+" "+temp.zip)+"&output=csv&sensor=false&key=" + Rails.configuration.google_maps2_key).gets.split(',')
-      sleep(sleep_time)
-      if @status == 620
-        sleep_time+=1
-        redo
-      end
-    end
-    temp.latitude=@latitude
-    temp.longitude=@longitude
-    temp.save!
+    ride=Ride.find(params[:rideID])
+    ride.address1=params[:address1]
+    ride.address2=params[:address2]
+    ride.city=params[:city]
+    ride.state=params[:state]
+    ride.zip=params[:zip]
+    address=(ride.address2 =~ /^\d/) ? ride.address2 : ride.address1
+    @latitude, @longitude = Geocoder.coordinates(address+", "+ride.city+", "+ride.state+" "+ride.zip)
+    ride.latitude=@latitude
+    ride.longitude=@longitude
+    ride.save!
     render :text => @latitude+','+@longitude
   end
 

@@ -1,6 +1,6 @@
 production: &shared
-  google_maps2_key:
-  rideshare_password: 
+  rideshare_password:
+  geocode_key: asdf
 
 development:
   <<: *shared

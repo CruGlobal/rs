@@ -1,4 +1,0 @@
-# API key for google maps 2.0
-# Google Maps 3.0 does not require API key
-
-GOOGLE_MAPS2_KEY = "your key here"
