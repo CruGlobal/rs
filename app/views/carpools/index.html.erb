@@ -4,7 +4,7 @@
 	<title>Rideshare Admin</title>
   <%= stylesheet_link_tag "application", :media => "all" %>
 
-  <%= javascript_include_tag "//www.google.com/jsapi?key=#{Rails.configuration.google_maps2_key}" %>
+  <%= javascript_include_tag "//www.google.com/jsapi" %>
 	<%= javascript_include_tag "application", "data-turbolinks-track" => true %>
 </head>
 <body onload="<%="displayMessage('flash');" if @message%>setTimeout(updateList, 250);" onunload="GUnload()">
