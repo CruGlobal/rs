@@ -7,13 +7,14 @@ Rs::Application.routes.draw do
   get 'carpool/report'            => 'carpools#report'
   
   get  'carpool/register/:id'     => 'carpools#register'
-  post 'carpool/register'         => 'carpools#register', as: 'register_submit'
-  post  'carpool/register/:id'     => 'carpools#register_update', as: 'register_update'
+  match 'carpool/register'        => 'carpools#register', as: 'register_submit', via: [:get, :post]
+  match 'crs/ride'                => 'carpools#register', via: [:get, :post]
+  post  'carpool/register/:id'    => 'carpools#register_update', as: 'register_update'
   
   put 'carpool/add_rider'         => 'carpools#add_rider'
   put 'carpool/remove_rider'      => 'carpools#remove_rider'
   
-  get 'carpool/update_addresses'  => 'carpools#update_addresses', via: [:get, :update]
+  match 'carpool/update_addresses'  => 'carpools#update_addresses', via: [:get, :update]
   get 'carpool/:id/empty'         => 'carpools#empty'
   get 'carpool/:id'               => 'carpools#index'
   get 'carpool'                   => 'carpools#index'

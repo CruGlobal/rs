@@ -5,6 +5,8 @@ class Ride < ActiveRecord::Base
 	belongs_to :person
 	belongs_to :event
 	has_many :rides, :foreign_key => "driver_ride_id"
+
+  attr_accessible :driver_ride_id, :event_id, :person_id, :address1, :address2, :address3, :address4, :country, :city, :state, :zip, :phone, :contact_method, :number_passengers, :drive_willingness, :depart_time, :special_info, :email
 	
 	def self.drivers_by_event_id(event_id)
 		result = Ride.where('rideshare_ride.drive_willingness in (1, 2, 3)').

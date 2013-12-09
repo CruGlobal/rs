@@ -222,22 +222,22 @@ class CarpoolsController < ApplicationController
     
     # the Ride has not been created
     else
-      session[:personID] = params[:person_id]
-      session[:country]  = params[:country]
-      session[:phone]    = params[:phone]
-      session[:email]    = params[:email]
-      session[:gender]   = params[:gender]
-      session[:school_year]=params[:school_year]
-      session[:redirect]=params[:redirect]
-      session[:first_name]=params[:first_name]
-      session[:last_name]=params[:last_name]
-      session[:contact_method]=params[:contact_method]
+      session[:personID] ||= params[:person_id]
+      session[:country]  ||= params[:country]
+      session[:phone]    ||= params[:phone]
+      session[:email]    ||= params[:email]
+      session[:gender]   ||= params[:gender]
+      session[:school_year] ||= params[:school_year]
+      session[:redirect] ||= params[:redirect]
+      session[:first_name] ||= params[:first_name]
+      session[:last_name] ||= params[:last_name]
+      session[:contact_method] ||= params[:contact_method]
       
-      person = Person.where(:personID => params[:person_id]).first
+      person = Person.where(:personID => params[:person_id] || session[:personID]).first
       
       @event = Event.where(:conference_id => params[:conference_id]).first
       if @event.nil?
-        @event = Event.new(:email_content=>'',:event_name => params[:conference_name], :conference_id => params[:conference_id].to_i, :password => "")
+        @event = Event.new({:email_content=>'',:event_name => params[:conference_name], :conference_id => params[:conference_id].to_i, :password => ""}, without_protection: true)
         @event.save!
       end
       session[:event]=@event.id
@@ -260,10 +260,19 @@ class CarpoolsController < ApplicationController
         :special_info => params[:special_info], 
         :email => session[:email])
       
-      coordinates = Geocoder.coordinates(ride.address_single_line)
-      ride.latitude = coordinates[0]
-      ride.longitude = coordinates[1]
-      ride.save!
+      begin
+        coordinates = Geocoder.coordinates(ride.address_single_line)
+        ride.latitude = coordinates[0]
+        ride.longitude = coordinates[1]
+      rescue
+        # ignore coordinate failures
+      end
+
+      if request.post?
+        ride.save!
+        redirect_to session[:redirect]
+        return
+      end
     end
     if !person.nil?
       if person.first_name == params[:first_name] && person.last_name == params[:last_name] && (person.yearInSchool == params[:school_year]||(person.yearInSchool.nil?&&(params[:school_year]=="null"||params[:school_year]=="")) )
@@ -296,7 +305,7 @@ class CarpoolsController < ApplicationController
         params[:special_info]=ride.special_info
         params[:contact_method]=ride.contact_method
         params[:ride]=(ride.drive_willingness == 3) ? 'yes':'no'
-        @done="You have already finished this registration. You can update your information here or <a href='"+params[:redirect]+"'>Go Back</a>"
+        @done="You have already finished this registration. You can update your information here or <a href='"+session[:redirect]+"'>Go Back</a>"
       end
     end
   end
