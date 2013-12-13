@@ -209,13 +209,13 @@ class CarpoolsController < ApplicationController
     
     # the Ride has already been created
     if params[:id].present?
-      ride=Ride.find(params[:id])
-      if session[:event_id] != ride.event.conference_id
+      @ride=Ride.find(params[:id])
+      if session[:event_id] != @ride.event.conference_id
         render :text => "" and return
       end
-      person = ride.person
-      @event = ride.event
-      params[:redirect]="/"+ride.event.conference_id.to_s
+      person = @ride.person
+      @event = @ride.event
+      params[:redirect]="/"+@ride.event.conference_id.to_s
       session[:redirect]=params[:redirect]
       session[:event]=@event.id
       session[:personID]=person.personID
@@ -242,7 +242,7 @@ class CarpoolsController < ApplicationController
       end
       session[:event]=@event.id
       
-      ride = Ride.new(:driver_ride_id => 0, 
+      @ride = Ride.new(:driver_ride_id => 0,
         :event_id => @event.id, 
         :person_id => person.personID, 
         :address1 => params[:address_1], 
@@ -267,27 +267,27 @@ class CarpoolsController < ApplicationController
         :email => session[:email])
       
       begin
-        coordinates = Geocoder.coordinates(ride.address_single_line)
-        ride.latitude = coordinates[0]
-        ride.longitude = coordinates[1]
+        coordinates = Geocoder.coordinates(@ride.address_single_line)
+        @ride.latitude = coordinates[0]
+        @ride.longitude = coordinates[1]
       rescue
         # ignore coordinate failures
       end
 
-      if request.post?
-        ride.save!
-        redirect_to session[:redirect]
-        return
-      end
+      #if request.post?
+        @ride.save!
+      #  redirect_to session[:redirect]
+      #  return
+      #end
     end
     if !person.nil?
       if person.first_name == params[:first_name] && person.last_name == params[:last_name] && (person.yearInSchool == params[:school_year]||(person.yearInSchool.nil?&&(params[:school_year]=="null"||params[:school_year]=="")) )
-        ride = Ride.where(:person_id => person.personID, :event_id => @event.id).first
+        @ride = Ride.where(:person_id => person.personID, :event_id => @event.id).first
       end
-      if !ride.nil?
-        params[:situation]=(ride.drive_willingness == 0)? 'ride':(ride.drive_willingness == 1 || ride.drive_willingness == 3) ? 'drive' : 'done'
+      if !@ride.nil?
+        params[:situation]=(@ride.drive_willingness == 0)? 'ride':(@ride.drive_willingness == 1 || @ride.drive_willingness == 3) ? 'drive' : 'done'
         #params[:time]=(ride.drive_willingness == 2) ? nil:ride.departureTime
-        params[:time]=ride.departureTime
+        params[:time]=@ride.departureTime
         if !params[:time].nil?
           params[:time_hour] = params[:time][0,2].to_i
           params[:time_minute] = params[:time][3,5].to_i
@@ -302,19 +302,18 @@ class CarpoolsController < ApplicationController
           params[:time_minute] = 0
           params[:time_am_pm] = "PM"
         end
-        params[:spaces]=ride.number_passengers
-        params[:address_1]=ride.address1
-        params[:address_2]=ride.address2
-        params[:city]=ride.city
-        params[:state]=ride.state
-        params[:zip]=ride.zip
-        params[:special_info]=ride.special_info
-        params[:contact_method]=ride.contact_method
-        params[:ride]=(ride.drive_willingness == 3) ? 'yes':'no'
+        params[:spaces]=@ride.number_passengers
+        params[:address_1]=@ride.address1
+        params[:address_2]=@ride.address2
+        params[:city]=@ride.city
+        params[:state]=@ride.state
+        params[:zip]=@ride.zip
+        params[:special_info]=@ride.special_info
+        params[:contact_method]=@ride.contact_method
+        params[:ride]=(@ride.drive_willingness == 3) ? 'yes':'no'
         @done="You have already finished this registration. You can update your information here or <a href='"+session[:redirect]+"'>Go Back</a>"
       end
     end
-    @ride = ride
   end
 
   def login
