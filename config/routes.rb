@@ -9,7 +9,7 @@ Rs::Application.routes.draw do
   get  'carpool/register/:id'     => 'carpools#register'
   match 'carpool/register'        => 'carpools#register', as: 'register_submit', via: [:get, :post]
   match 'crs/ride'                => 'carpools#register', via: [:get, :post]
-  post  'carpool/register/:id'    => 'carpools#register_update', as: 'register_update'
+  patch  'carpool/register/:id'    => 'carpools#register_update', as: 'register_update'
   
   put 'carpool/add_rider'         => 'carpools#add_rider'
   put 'carpool/remove_rider'      => 'carpools#remove_rider'

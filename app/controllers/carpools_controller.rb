@@ -179,11 +179,11 @@ class CarpoolsController < ApplicationController
     ride = Ride.find(params[:id])
     
     # TODO this and Geocoding update should be abstracted into a model instance method
-    ride.address1 = params[:address_1]
-    ride.address2 = params[:address_2]
-    ride.city     = params[:city]
-    ride.state    = params[:state]
-    ride.zip      = params[:zip]
+    #ride.address1 = params[:address_1]
+    #ride.address2 = params[:address_2]
+    #ride.city     = params[:city]
+    #ride.state    = params[:state]
+    #ride.zip      = params[:zip]
     
     coordinates = Geocoder.coordinates(ride.address_single_line)
     @latitude  = coordinates[0]
@@ -198,7 +198,7 @@ class CarpoolsController < ApplicationController
     @status    = 0
     @accuracy  = 0
     
-    if ride.save!
+    if ride.update_attributes(ride_params)
       redirect_to "/carpool/#{ride.event.conference_id}"
     else
       redirect_to "/carpool/register/#{ride.id}"
@@ -255,7 +255,13 @@ class CarpoolsController < ApplicationController
         :zip => params[:zip], 
         :phone => session[:phone], 
         :contact_method => params[:contact], 
-        :number_passengers => ((params[:spaces].blank?) ? 0 : params[:spaces]), :drive_willingness => (params[:situation] == "ride") ? 0 : (params[:situation] == "drive") ? (params[:ride] == 'yes') ? 3 : 1 : 2, 
+        :number_passengers => ((params[:spaces].blank?) ? 0 : params[:spaces]), :drive_willingness => (params[:situation] == "ride") ? 0 : (params[:situation] == "drive") ? (params[:ride] == 'yes') ? 3 : 1 : 2,
+        :situation => params[:situation],
+        :change => params[:change],
+        :time_hour => params[:time_hour],
+        :time_minute => params[:time_minute],
+        :time_am_pm => params[:time_am_pm],
+        :spaces => params[:spaces],
         :depart_time => params[:time], 
         :special_info => params[:special_info], 
         :email => session[:email])
@@ -308,6 +314,7 @@ class CarpoolsController < ApplicationController
         @done="You have already finished this registration. You can update your information here or <a href='"+session[:redirect]+"'>Go Back</a>"
       end
     end
+    @ride = ride
   end
 
   def login
@@ -340,5 +347,9 @@ class CarpoolsController < ApplicationController
       # event_local_id is the rideshare_event.event_id
       session[:event_local_id] = params[:event_local_id].to_i if params[:event_local_id]
     end
+  end
+
+  def ride_params
+    params[:ride]
   end
 end

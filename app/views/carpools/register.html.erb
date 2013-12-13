@@ -37,8 +37,8 @@
 				document.getElementById("rider_address").style.display = "none";
 				document.getElementById("driver").style.display = "none";
 				document.getElementById("driver_change").style.display = "none";
-				if (document.getElementById("situation_drive").checked || document.getElementById("situation_ride").checked) {
-					if (document.getElementById("situation_drive").checked) {
+				if (document.getElementById("ride_situation_drive").checked || document.getElementById("ride_situation_ride").checked) {
+					if (document.getElementById("ride_situation_drive").checked) {
 						document.getElementById("driver_address").style.display = "";
 						document.getElementById("driver").style.display = "";
 						document.getElementById("driver_change").style.display = "";
@@ -65,10 +65,10 @@
 			}
 
 			function special_info_callback() {
-				if (document.getElementById("special_info_check_yes").checked) {
-					document.getElementById("special_info").style.display = "";
+				if (document.getElementById("ride_special_info_check_yes").checked) {
+					document.getElementById("ride_special_info").style.display = "";
 				} else {
-					document.getElementById("special_info").style.display = "none";
+					document.getElementById("ride_special_info").style.display = "none";
 				}
 			}
 
@@ -76,7 +76,7 @@
 				document.getElementById("map").style.display = "none";
 				document.getElementById("map_description").style.display = "none";
 				var address;
-				address = (/^\d/.test(document.getElementById("address_2").value))?document.getElementById("address_2").value:document.getElementById("address_1").value;
+				address = (/^\d/.test(document.getElementById("ride_address2").value))?document.getElementById("ride_address2").value:document.getElementById("ride_address1").value;
 				address += ", "+document.getElementById("city").value+", "+document.getElementById("state").value+" "+document.getElementById("zip").value;
 				geocoder.getLatLng(address, function(latlng) {
 					if (marker) {
@@ -140,8 +140,8 @@
 			document.getElementById("rider_address").style.display = "none";
 			document.getElementById("driver").style.display = "none";
 			document.getElementById("driver_change").style.display = "none";
-			if (document.getElementById("situation_drive").checked || document.getElementById("situation_ride").checked) {
-				if (document.getElementById("situation_drive").checked) {
+			if (document.getElementById("ride_situation_drive").checked || document.getElementById("ride_situation_ride").checked) {
+				if (document.getElementById("ride_situation_drive").checked) {
 					document.getElementById("driver_address").style.display = "";
 					document.getElementById("driver").style.display = "";
 					document.getElementById("driver_change").style.display = "";
@@ -168,10 +168,10 @@
 		}
 
 		function special_info_callback() {
-			if (document.getElementById("special_info_check_yes").checked) {
-				document.getElementById("special_info").style.display = "";
+			if (document.getElementById("ride_special_info_check_yes").checked) {
+				document.getElementById("ride_special_info").style.display = "";
 			} else {
-				document.getElementById("special_info").style.display = "none";
+				document.getElementById("ride_special_info").style.display = "none";
 			}
 		}
 
@@ -179,8 +179,8 @@
 			document.getElementById("map").style.display = "none";
 			document.getElementById("map_description").style.display = "none";
 			var address;
-			address = (/^\d/.test(document.getElementById("address_2").value))?document.getElementById("address_2").value:document.getElementById("address_1").value;
-			address += ", "+document.getElementById("city").value+", "+document.getElementById("state").value+" "+document.getElementById("zip").value;
+			address = (/^\d/.test(document.getElementById("ride_address2").value))?document.getElementById("ride_address2").value:document.getElementById("ride_address1").value;
+			address += ", "+document.getElementById("ride_city").value+", "+document.getElementById("ride_state").value+" "+document.getElementById("ride_zip").value;
 			geocoder.getLatLng(address, function(latlng) {
 				if (marker) {
 					map.removeOverlay(marker);
@@ -301,7 +301,7 @@
 	
 	<%# conditionally route to Carpools#regiseter and Carpools#register_update  %>
 	<% url = params[:id].nil? ? register_submit_path  : register_update_path(id: params[:id]) %>
-	<%= form_tag(url) do %>
+	<%= form_for(@ride, url: url) do |f| %>
 	
 		<table>
 			<tbody id="conference">
@@ -322,11 +322,11 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<%=radio_button_tag 'situation', 'ride', (params[:situation] == 'ride'), :onclick => 'situation_callback();'%> I do not have a ride and I would like one arranged for me.<br />
-						<%=radio_button_tag 'situation', 'drive', (params[:situation] == 'drive'), :onclick => 'situation_callback();'%> I plan on driving and I have room for extra people to be assigned to me.<br />
-						<!--<%=radio_button_tag 'situation', 'ride_done', (params[:situation] == 'ride_done'), :onclick => 'situation_callback();'%> I have a ride and I do not need one arranged for me.<br />
-						<%=radio_button_tag 'situation', 'drive_done', (params[:situation] == 'drive_done'), :onclick => 'situation_callback();'%> I plan on driving and I do not have extra room in my car.-->
-						<%=radio_button_tag 'situation', 'done', (params[:situation] == 'done'), :onclick => 'situation_callback();'%> I have my own ride already and cannot bring any extra people.
+						<%= f.radio_button 'situation', 'ride', checked: (params[:situation] == 'ride'), :onclick => 'situation_callback();'%> I do not have a ride and I would like one arranged for me.<br />
+						<%= f.radio_button 'situation', 'drive', checked: (params[:situation] == 'drive'), :onclick => 'situation_callback();'%> I plan on driving and I have room for extra people to be assigned to me.<br />
+						<!--<%= f.radio_button 'situation', 'ride_done', checked: (params[:situation] == 'ride_done'), :onclick => 'situation_callback();'%> I have a ride and I do not need one arranged for me.<br />
+						<%= f.radio_button 'situation', 'drive_done', checked: (params[:situation] == 'drive_done'), :onclick => 'situation_callback();'%> I plan on driving and I do not have extra room in my car.-->
+						<%= f.radio_button 'situation', 'done', checked: (params[:situation] == 'done'), :onclick => 'situation_callback();'%> I have my own ride already and cannot bring any extra people.
 					</td>
 				</tr>
 			</tbody>
@@ -336,8 +336,8 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<%=radio_button_tag 'change', 'yes', (params[:ride] == 'yes') %> Yes<br />
-						<%=radio_button_tag 'change', 'no', (params[:ride] == 'no') %> No
+						<%= f.radio_button 'change', 'yes', checked: (params[:ride] == 'yes') %> Yes<br />
+						<%= f.radio_button 'change', 'no', checked: (params[:ride] == 'no') %> No
 					</td>
 				</tr>
 			</tbody>
@@ -350,7 +350,7 @@
 				</tr>
 				<tr>
 					<td><label for="time">Time:</label></td>
-					<td><%= select_tag "time_hour",options_for_select({"1" => "01", "2" => "02", "3" => "03", "4" => "04", "5" => "05", "6" => "06", "7" => "07", "8" => "08", "9" => "09", "10" => "10", "11" => "11", "12" => "12"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_hour].to_i)%>:<%=select_tag "time_minute",options_for_select({"00" => "00", "15" => "15", "30" => "30", "45" => "45"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_minute].to_i)%> <%=select_tag "time_am_pm", options_for_select({"AM"=>"AM","PM"=>"PM"}.sort{|a,b| a[1] <=> b[1]}, :selected => params[:time_am_pm])%></td>
+					<td><%= f.select "time_hour",options_for_select({"1" => "01", "2" => "02", "3" => "03", "4" => "04", "5" => "05", "6" => "06", "7" => "07", "8" => "08", "9" => "09", "10" => "10", "11" => "11", "12" => "12"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_hour].to_i)%>:<%= f.select "time_minute",options_for_select({"00" => "00", "15" => "15", "30" => "30", "45" => "45"}.sort{|a,b| a[1] <=> b[1]}, :selected => "%02d" % params[:time_minute].to_i)%> <%= f.select "time_am_pm", options_for_select({"AM"=>"AM","PM"=>"PM"}.sort{|a,b| a[1] <=> b[1]}, :selected => params[:time_am_pm])%></td>
 				</tr>
 			</tbody>
 
@@ -363,7 +363,8 @@
 				</tr>
 				<tr>
 					<td><label for="spaces">Spaces:</label></td>
-					<td><%=text_field_tag "spaces", params[:spaces], :size => 3%><%=hidden_field_tag "spaces_count", @spaces_count%></td>
+					<td><%= f.text_field "spaces", :size => 3%>
+            <%= f.hidden_field "spaces_count", value: @spaces_count%></td>
 				</tr>
 			</tbody>
 			<% if params[:js] == "false"%>
@@ -389,24 +390,24 @@
 					<td colspan="2" id="error">We are unable to determine the location of this address. Please update your address.</td>
 				</tr>
 				<tr>
-					<td><label for="address_1">Address Line 1:</label></td>
-					<td><%=text_field_tag "address_1", params[:address_1], :onchange => "check_address();"%></td>
+					<td><label for="ride_address1">Address Line 1:</label></td>
+					<td><%=f.text_field "address1", :onchange => "check_address();"%></td>
 				</tr>
 				<tr>
-					<td><label for="address_2">Address Line 2 (Optional):</label></td>
-					<td><%=text_field_tag "address_2", (params[:address_2] if params[:address_2] != 'null'), :onchange => "check_address();"%></td>
+					<td><label for="ride_address2">Address Line 2 (Optional):</label></td>
+					<td><%= f.text_field "address2", value: (params[:address_2] if params[:address_2] != 'null'), :onchange => "check_address();"%></td>
 				</tr>
 				<tr>
 					<td><label for="city">City:</label></td>
-					<td><%=text_field_tag "city", params[:city], :onchange => "check_address();"%></td>
+					<td><%= f.text_field "city", :onchange => "check_address();"%></td>
 				</tr>
 				<tr>
 					<td><label for="state">State:</label></td>
-					<td><%=text_field_tag "state", params[:state], :onchange => "check_address();"%></td>
+					<td><%= f.text_field "state", :onchange => "check_address();"%></td>
 				</tr>
 				<tr>
 					<td><label for="zip">Zip:</label></td>
-					<td><%=text_field_tag "zip", params[:zip], :onchange => "check_address();"%></td>
+					<td><%= f.text_field "zip", :onchange => "check_address();"%></td>
 				</tr>
 				<tr>
 					<td id="map_description" colspan="2">Please make sure that your address is mapped correctly. If it is not mapped correctly, please change your address above.</td>
@@ -424,9 +425,9 @@
 				<tr>
 					<td colspan="2">
 						(Your initial ride assignment will be by email.)<br />
-						<%=radio_button_tag "contact_method", "phone", (params[:contact_method] == 'phone')%> Phone Call<br />
-						<%=radio_button_tag "contact_method", "text",  (params[:contact_method] == 'text')%> Texting<br />
-						<%=radio_button_tag "contact_method", "email", (params[:contact_method] == 'email')%> Email
+						<%= f.radio_button "contact_method", "phone", checked: (params[:contact_method] == 'phone')%> Phone Call<br />
+						<%= f.radio_button "contact_method", "text",  checked: (params[:contact_method] == 'text')%> Texting<br />
+						<%= f.radio_button "contact_method", "email", checked: (params[:contact_method] == 'email')%> Email
 					</td>
 				</tr>
 				<tr>
@@ -436,11 +437,11 @@
 					<td colspan="2">This includes if you need to be at the conference at an earlier time, need to leave the conference early, or anything else that you haven't told us.</td>
 				</tr>
 				<tr>
-					<td><%=radio_button_tag 'special_info_check','yes',(!params[:special_info].nil? && !params[:special_info].empty?), :onclick => 'special_info_callback();' %>Yes</td>
-					<td><%=radio_button_tag 'special_info_check','no',(params[:special_info].nil? || params[:special_info].empty?), :onclick => 'special_info_callback();' %>No</td>
+					<td><%= f.radio_button 'special_info_check','yes', checked: (!params[:special_info].nil? && !params[:special_info].empty?), :onclick => 'special_info_callback();' %>Yes</td>
+					<td><%= f.radio_button 'special_info_check','no', checked: (params[:special_info].nil? || params[:special_info].empty?), :onclick => 'special_info_callback();' %>No</td>
 				</tr>
 				<tr>
-					<td colspan="2"><%=text_area_tag "special_info", params[:special_info], :size => "40x5"%></td>
+					<td colspan="2"><%= f.text_area "special_info", :size => "40x5"%></td>
 				</tr>
 			</tbody>
 		</table>
@@ -459,7 +460,7 @@
 				</ol>
 			</p>
 		</div>
-		<%= submit_tag "Finish Carpool Registration", :id => "submit" %>
+		<%= f.submit "Finish Carpool Registration", :id => "submit" %>
 	<%end%>
 </body>
 </html>
