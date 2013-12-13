@@ -300,7 +300,7 @@
 	<%= "<div class='done'> #{@done} </div>".html_safe unless @done.nil?%>
 	
 	<%# conditionally route to Carpools#regiseter and Carpools#register_update  %>
-	<% url = params[:id].nil? ? register_submit_path  : register_update_path(id: params[:id]) %>
+	<% url = @ride.new_record? ? register_submit_path  : register_update_path(id: @ride) %>
 	<%= form_for(@ride, url: url) do |f| %>
 	
 		<table>

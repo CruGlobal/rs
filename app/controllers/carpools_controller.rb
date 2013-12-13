@@ -199,7 +199,7 @@ class CarpoolsController < ApplicationController
     @accuracy  = 0
     
     if ride.update_attributes(ride_params)
-      redirect_to "/carpool/#{ride.event.conference_id}"
+      redirect_to(session[:redirect] || "/carpool/#{ride.event.conference_id}")
     else
       redirect_to "/carpool/register/#{ride.id}"
     end
