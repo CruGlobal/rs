@@ -9,7 +9,11 @@ class Ride < ActiveRecord::Base
   attr_accessible :driver_ride_id, :event_id, :person_id, :address1, :address2, :address3, :address4, :country, :city, :state, :zip, :phone,
                   :contact_method, :number_passengers, :drive_willingness, :depart_time, :special_info, :email, :situation, :change, :time_hour,
                   :time_minute, :time_am_pm, :spaces, :spaces_count, :special_info_check
-	
+
+  validates :situation, presence: true
+
+  before_save :set_geocode, :set_drive_willingness
+
 	def self.drivers_by_event_id(event_id)
 		Ride.where('rideshare_ride.drive_willingness in (1, 2, 3)').
 			where('rideshare_ride.event_id' => event_id).
@@ -97,5 +101,31 @@ class Ride < ActiveRecord::Base
 				end
 			end
 		end
-	end
+  end
+
+  def set_geocode
+    [:address1, :address2, :address3, :address4, :country, :city, :state, :zip].each do |field|
+      if changed.include?(field.to_s)
+        coordinates = Geocoder.coordinates(address_single_line)
+        @latitude  = coordinates[0]
+        @longitude = coordinates[1]
+
+        self.latitude   = @latitude
+        self.longitude  = @longitude
+
+        break
+      end
+    end
+  end
+
+  def set_drive_willingness
+    self.drive_willingness = case situation
+                               when "ride"
+                                 0
+                               when "drive"
+                                 1
+                               else
+                                 2
+                             end
+  end
 end

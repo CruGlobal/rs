@@ -76,7 +76,7 @@ class CarpoolsController < ApplicationController
       render :text => '' and return
     else
       @drivers = Ride.where(:drive_willingness => 1).where(:event_id => session[:event_local_id]).includes(:person)
-      @unassigned_riders = Ride.where(:drive_willingness => 0).where(:driver_ride_id => 0, :event_id => session[:event_local_id]).includes(:person)
+      @unassigned_riders = Ride.where(:drive_willingness => 0).where(:driver_ride_id => nil, :event_id => session[:event_local_id]).includes(:person)
     end
   end
 
@@ -148,8 +148,8 @@ class CarpoolsController < ApplicationController
 
   def add_rider
     begin
-      rider=Ride.find(params[:rider].to_i)
-      driver=Ride.find(params[:driver].to_i)
+      rider=Ride.find(params[:rider])
+      driver=Ride.find(params[:driver])
       if rider.drive_willingness == 0 && driver.drive_willingness == 1
         rider.driver_ride_id=driver.id
         rider.save!
@@ -158,6 +158,7 @@ class CarpoolsController < ApplicationController
         render :text => "failure"
       end
     rescue Exception=>e
+      raise e
       render :text => "failure"
     end
   end
@@ -165,7 +166,7 @@ class CarpoolsController < ApplicationController
   def remove_rider
     begin
       rider=Ride.find(params[:rider].to_i)
-      rider.driver_ride_id=0;
+      rider.driver_ride_id = nil
       rider.save!
       render :nothing => true
     rescue Exception=>e
@@ -184,14 +185,7 @@ class CarpoolsController < ApplicationController
     #ride.city     = params[:city]
     #ride.state    = params[:state]
     #ride.zip      = params[:zip]
-    
-    coordinates = Geocoder.coordinates(ride.address_single_line)
-    @latitude  = coordinates[0]
-    @longitude = coordinates[1]
-    
-    ride.latitude   = @latitude
-    ride.longitude  = @longitude
-     
+
     # @status, @accuracy, @status are legacy code variables possibly used in the HTML/JS. :(
     # TODO - go back and remove
     @status    = 620
@@ -201,6 +195,7 @@ class CarpoolsController < ApplicationController
     if ride.update_attributes(ride_params)
       redirect_to(session[:redirect] || "/carpool/#{ride.event.conference_id}")
     else
+      flash[:alert] = 'Please let us know if you can drive or need a ride'
       redirect_to "/carpool/register/#{ride.id}"
     end
   end
@@ -210,13 +205,12 @@ class CarpoolsController < ApplicationController
     # the Ride has already been created
     if params[:id].present?
       @ride=Ride.find(params[:id])
-      if session[:event_id] != @ride.event.conference_id
-        render :text => "" and return
-      end
+      #if session[:event_id] != @ride.event.conference_id
+      #  render :text => "" and return
+      #end
       person = @ride.person
       @event = @ride.event
-      params[:redirect]="/"+@ride.event.conference_id.to_s
-      session[:redirect]=params[:redirect]
+      session[:redirect] = params[:redirect] || "/carpool/"+@ride.event.conference_id.to_s
       session[:event]=@event.id
       session[:personID]=person.personID
     
@@ -228,7 +222,7 @@ class CarpoolsController < ApplicationController
       session[:email]    ||= params[:email]
       session[:gender]   ||= params[:gender]
       session[:school_year] ||= params[:school_year]
-      session[:redirect] ||= params[:redirect]
+      session[:redirect] = params[:redirect] if params[:redirect]
       session[:first_name] ||= params[:first_name]
       session[:last_name] ||= params[:last_name]
       session[:contact_method] ||= params[:contact_method]
@@ -240,79 +234,50 @@ class CarpoolsController < ApplicationController
         @event = Event.new({:email_content=>'',:event_name => params[:conference_name], :conference_id => params[:conference_id].to_i, :password => ""}, without_protection: true)
         @event.save!
       end
-      session[:event]=@event.id
+      session[:event] = @event.id
       
-      @ride = Ride.new(:driver_ride_id => 0,
-        :event_id => @event.id, 
-        :person_id => person.personID, 
-        :address1 => params[:address_1], 
-        :address2 => params[:address_2], 
-        :address3 => '', 
-        :address4 => '', 
-        :country => '', 
-        :city => params[:city], 
-        :state => params[:state], 
-        :zip => params[:zip], 
-        :phone => session[:phone], 
-        :contact_method => params[:contact], 
-        :number_passengers => ((params[:spaces].blank?) ? 0 : params[:spaces]), :drive_willingness => (params[:situation] == "ride") ? 0 : (params[:situation] == "drive") ? (params[:ride] == 'yes') ? 3 : 1 : 2,
-        :situation => params[:situation],
-        :change => params[:change],
-        :time_hour => params[:time_hour],
-        :time_minute => params[:time_minute],
-        :time_am_pm => params[:time_am_pm],
-        :spaces => params[:spaces],
-        :depart_time => params[:time], 
-        :special_info => params[:special_info], 
-        :email => session[:email])
-      
-      begin
-        coordinates = Geocoder.coordinates(@ride.address_single_line)
-        @ride.latitude = coordinates[0]
-        @ride.longitude = coordinates[1]
-      rescue
-        # ignore coordinate failures
-      end
+      unless @ride = Ride.where(person_id: person.id, event_id: @event.id).first
+        @ride = Ride.new(:event_id => @event.id,
+                          :person_id => person.personID,
+                          :address1 => params[:address_1],
+                          :address2 => params[:address_2],
+                          :address3 => '',
+                          :address4 => '',
+                          :country => '',
+                          :city => params[:city],
+                          :state => params[:state],
+                          :zip => params[:zip],
+                          :phone => session[:phone],
+                          :contact_method => params[:contact] || 'email',
+                          :number_passengers => params[:spaces] || 3,
+                          :situation => params[:situation],
+                          :change => params[:change],
+                          :time_hour => params[:time_hour],
+                          :time_minute => params[:time_minute],
+                          :time_am_pm => params[:time_am_pm],
+                          :spaces => params[:spaces] || 3,
+                          :depart_time => params[:time],
+                          :special_info => params[:special_info] || 'no',
+                          :email => session[:email],
+                          :situation => 'done',
+                          :change => 'yes',
+                          :special_info_check => 'no'
+        )
 
-      #if request.post?
-        @ride.save!
-      #  redirect_to session[:redirect]
-      #  return
-      #end
-    end
-    if !person.nil?
-      if person.first_name == params[:first_name] && person.last_name == params[:last_name] && (person.yearInSchool == params[:school_year]||(person.yearInSchool.nil?&&(params[:school_year]=="null"||params[:school_year]=="")) )
-        @ride = Ride.where(:person_id => person.personID, :event_id => @event.id).first
-      end
-      if !@ride.nil?
-        params[:situation]=(@ride.drive_willingness == 0)? 'ride':(@ride.drive_willingness == 1 || @ride.drive_willingness == 3) ? 'drive' : 'done'
-        #params[:time]=(ride.drive_willingness == 2) ? nil:ride.departureTime
-        params[:time]=@ride.departureTime
-        if !params[:time].nil?
-          params[:time_hour] = params[:time][0,2].to_i
-          params[:time_minute] = params[:time][3,5].to_i
-          if (params[:time_hour] < 12)
-            params[:time_am_pm] = "AM"
-          else
-            params[:time_am_pm] = "PM"
-            params[:time_hour] = params[:time_hour]-12
-          end
-        else
-          params[:time_hour] = 12
-          params[:time_minute] = 0
-          params[:time_am_pm] = "PM"
+        begin
+          coordinates = Geocoder.coordinates(@ride.address_single_line)
+          @ride.latitude = coordinates[0]
+          @ride.longitude = coordinates[1]
+        rescue
+          # ignore coordinate failures
         end
-        params[:spaces]=@ride.number_passengers
-        params[:address_1]=@ride.address1
-        params[:address_2]=@ride.address2
-        params[:city]=@ride.city
-        params[:state]=@ride.state
-        params[:zip]=@ride.zip
-        params[:special_info]=@ride.special_info
-        params[:contact_method]=@ride.contact_method
-        params[:ride]=(@ride.drive_willingness == 3) ? 'yes':'no'
-        @done="You have already finished this registration. You can update your information here or <a href='"+session[:redirect]+"'>Go Back</a>"
+
+        @ride.save!
       end
+    end
+
+    if @ride.situation.present?
+      @done="You have already finished this registration. You can update your information here or <a href='"+session[:redirect]+"'>Go Back</a>"
     end
   end
 
