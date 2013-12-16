@@ -153,7 +153,7 @@ class CarpoolsController < ApplicationController
       if rider.drive_willingness == 0 && driver.drive_willingness == 1
         rider.driver_ride_id=driver.id
         rider.save!
-        render :nothing => true
+        render :text => ''
       else
         render :text => "failure"
       end
