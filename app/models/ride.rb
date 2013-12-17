@@ -106,8 +106,7 @@ class Ride < ActiveRecord::Base
 
   # we don't driver_ride_id to be nil
   def driver_ride_id
-    super
-    0 if super.nil?
+    super || 0
   end
 
   def set_geocode
