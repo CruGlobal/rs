@@ -2,6 +2,8 @@
 password.rb
 google.rb
 
+config/settings.yml
+
 # ignore any assets outside the asset pipeline
 public/assets
 public/images
