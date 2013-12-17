@@ -5,8 +5,8 @@
 <link rel="stylesheet" type="text/css" href="https://yui.yahooapis.com/2.6.0/build/reset/reset-min.css" />
 </head>
 <body id="report">
-<a href="/<%=session[:event_id] %>">Back</a>
-<a href="/carpool/email">Email Setup</a>
+<a href="<%=session[:event_id] %>">Back</a>
+<a href="email">Email Setup</a>
 <h1>Report</h1>
 <h2>Drivers and Their Cars</h2>
 <% @drivers.select {|v| v.event_id == session[:event_local_id]  and v.rides.size != 0}.sort {|a,b| a.person.reverse_name <=> b.person.reverse_name }.each do |driver| %>
