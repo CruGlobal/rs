@@ -13,6 +13,7 @@ class Ride < ActiveRecord::Base
   validates :situation, presence: true
 
   before_save :set_geocode, :set_drive_willingness
+  before_validation :set_situation
 
 	def self.drivers_by_event_id(event_id)
 		Ride.where('rideshare_ride.drive_willingness in (1, 2, 3)').
@@ -128,4 +129,18 @@ class Ride < ActiveRecord::Base
                                  2
                              end
   end
+
+  def set_situation
+    if drive_willingness.present? && situation == nil
+      self.situation = case drive_willingness
+                        when 0
+                          "ride"
+                        when 1
+                          "drive"
+                        else
+                          nil
+                        end
+    end
+  end
+
 end
