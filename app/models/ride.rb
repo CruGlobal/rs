@@ -104,6 +104,12 @@ class Ride < ActiveRecord::Base
 		end
   end
 
+  # we don't driver_ride_id to be nil
+  def driver_ride_id
+    super
+    0 if super.nil?
+  end
+
   def set_geocode
     [:address1, :address2, :address3, :address4, :country, :city, :state, :zip].each do |field|
       if changed.include?(field.to_s)

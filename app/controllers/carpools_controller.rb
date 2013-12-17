@@ -166,7 +166,7 @@ class CarpoolsController < ApplicationController
   def remove_rider
     begin
       rider=Ride.find(params[:rider].to_i)
-      rider.driver_ride_id = nil
+      rider.driver_ride_id = 0
       rider.save!
       render :nothing => true
     rescue Exception=>e
