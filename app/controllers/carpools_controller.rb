@@ -75,8 +75,8 @@ class CarpoolsController < ApplicationController
     if session[:event_id].nil?
       render :text => '' and return
     else
-      @drivers = Ride.where(:drive_willingness => 1).where(:event_id => session[:event_local_id]).includes(:person)
-      @unassigned_riders = Ride.where(:drive_willingness => 0).where(:driver_ride_id => nil, :event_id => session[:event_local_id]).includes(:person)
+      @drivers = Ride.where(:drive_willingness => 1, :event_id => session[:event_local_id]).includes(:person)
+      @unassigned_riders = Ride.where(:drive_willingness => 0, :driver_ride_id => 0, :event_id => session[:event_local_id]).includes(:person)
     end
   end
 

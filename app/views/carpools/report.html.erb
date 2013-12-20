@@ -26,13 +26,13 @@
 		<tbody>
 			<tr class="driver">
 				<td><%= driver.person.full_name.html_safe %></td>
-				<td><%= driver.address.html_safe %></td>
-				<td><%= driver.email.html_safe %></td>
-				<td><%= driver.phone.html_safe %></td>
-				<td><%= driver.contact_method.html_safe %></td>
-				<td><%= driver.departureTimeNice.html_safe %></td>
+				<td><%= driver.address.to_s.html_safe %></td>
+				<td><%= driver.email.to_s.html_safe %></td>
+				<td><%= driver.phone.to_s.html_safe %></td>
+				<td><%= driver.contact_method.to_s.html_safe %></td>
+				<td><%= driver.departureTimeNice.to_s.html_safe %></td>
 			</tr>
-			<% if driver.special_info != '' %>
+			<% if driver.special_info_check != 'no' && driver.special_info != '' %>
 				<tr class="rider">
 					<td class="far_indent" colspan="7"><em>Special Info: </em><%= driver.special_info.html_safe %></td>
 				</tr>
@@ -40,14 +40,14 @@
 			<div class="rider_block">
 			<% driver.rides.sort {|a,b| a.person.reverse_name <=> b.person.reverse_name}.each do |rider| %>
 				<tr class="rider">
-					<td class="indent"><%= rider.person.full_name %></td>
-					<td><%== rider.address %></td>
-					<td><%== rider.email %></td>
-					<td><%== rider.phone %></td>
-					<td><%== rider.contact_method %></td>
+					<td class="indent"><%= rider.person.full_name.to_s.html_safe %></td>
+					<td><%== rider.address.to_s.html_safe %></td>
+					<td><%== rider.email.to_s.html_safe %></td>
+					<td><%== rider.phone.to_s.html_safe %></td>
+					<td><%== rider.contact_method.to_s.html_safe %></td>
 					<td><%== rider.departureTimeNice %></td>
 				</tr>
-				<% if rider.special_info != '' %>
+				<% if rider.special_info_check != 'no' && rider.special_info != '' %>
 					<tr class="rider">
 						<td class="far_indent" colspan="7"><em>Special Info: </em><%= rider.special_info.html_safe %></td>
 					</tr>

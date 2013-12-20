@@ -15,6 +15,8 @@ class Ride < ActiveRecord::Base
   before_save :set_geocode, :set_drive_willingness
   before_validation :set_situation
 
+  after_find :set_situation
+
 	def self.drivers_by_event_id(event_id)
 		Ride.where('rideshare_ride.drive_willingness in (1, 2, 3)').
 			where('rideshare_ride.event_id' => event_id).
