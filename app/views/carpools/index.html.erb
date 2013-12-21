@@ -33,6 +33,12 @@
 		<td>Location with all four types</td>
 	</tr>
 </table>
+<% if flash[:notice] %>
+  <div class="done notice" style="clear:both">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+
 <div id="message_block"></div>
 <div id="flash_message" class="message" style="width:600px;height:360px;">
 	<% if @help_rides.size > 0 %>

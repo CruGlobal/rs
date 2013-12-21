@@ -1,5 +1,5 @@
 class Email < ActionMailer::Base
-	default :sender => 'donotreply@cru.org', :content_type => "text/html"
+  default :from => 'donotreply@cru.org', :content_type => "text/html"
 
 	def car(driver_ride_id)
 		@driver = Ride.find(driver_ride_id)
@@ -11,7 +11,7 @@ class Email < ActionMailer::Base
 
 		@event = Event.find(@driver.event_id)
 
-		mail(:to => emails.join(','), :subject => 'Ride information for ' + @event.event_name )
+		mail(:to => emails, :subject => 'Ride information for ' + @event.event_name )
 	end
 
 end

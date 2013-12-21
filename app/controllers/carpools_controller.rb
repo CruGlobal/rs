@@ -100,14 +100,14 @@ class CarpoolsController < ApplicationController
       if params[:commit] == "Save"
         @notice = 'Email content successfully saved.'
       else
-        @event.email_content = @event.email_content.gsub("\n", '<br />') if !@event.email_content.nil?
+        #@event.email_content = @event.email_content.gsub("\n", '<br />') if !@event.email_content.nil?
         @drivers.each do |driver|
           Email.car(driver.id).deliver
         end
         flash[:notice] = 'Emails successfully sent.'
       end
     end
-    render :action => "email" and return
+    redirect_to("/carpool/#{session[:event_id]}")
   end
 
   def get_coordinates
@@ -173,12 +173,12 @@ class CarpoolsController < ApplicationController
       render :text => "failure"
     end
   end
-  
+
   def register_update
     # ride has already been created
-    
+
     ride = Ride.find(params[:id])
-    
+
     # TODO this and Geocoding update should be abstracted into a model instance method
     #ride.address1 = params[:address_1]
     #ride.address2 = params[:address_2]
@@ -191,7 +191,7 @@ class CarpoolsController < ApplicationController
     @status    = 620
     @status    = 0
     @accuracy  = 0
-    
+
     if ride.update_attributes(ride_params)
       redirect_to(session[:redirect] || "/carpool/#{ride.event.conference_id}")
     else
@@ -201,7 +201,7 @@ class CarpoolsController < ApplicationController
   end
 
   def register
-    
+
     # the Ride has already been created
     if params[:id].present?
       @ride=Ride.find(params[:id])
@@ -213,7 +213,7 @@ class CarpoolsController < ApplicationController
       session[:redirect] = params[:redirect] || "/carpool/"+@ride.event.conference_id.to_s
       session[:event]=@event.id
       session[:personID]=person.personID
-    
+
     # the Ride has not been created
     else
       session[:personID] ||= params[:person_id]
@@ -226,16 +226,16 @@ class CarpoolsController < ApplicationController
       session[:first_name] ||= params[:first_name]
       session[:last_name] ||= params[:last_name]
       session[:contact_method] ||= params[:contact_method]
-      
+
       person = Person.where(:personID => params[:person_id] || session[:personID]).first
-      
+
       @event = Event.where(:conference_id => params[:conference_id]).first
       if @event.nil?
         @event = Event.new({:email_content=>'',:event_name => params[:conference_name], :conference_id => params[:conference_id].to_i, :password => ""}, without_protection: true)
         @event.save!
       end
       session[:event] = @event.id
-      
+
       unless @ride = Ride.where(person_id: person.id, event_id: @event.id).first
         @ride = Ride.new(:event_id => @event.id,
                           :person_id => person.personID,

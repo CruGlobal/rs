@@ -2,8 +2,6 @@
 password.rb
 google.rb
 
-config/settings.yml
-
 # ignore any assets outside the asset pipeline
 public/assets
 public/images
@@ -21,5 +19,6 @@ public/stylesheets
 /tmp
 vendor/ruby
 config/settings.local.yml
+config/initializers/smtp.rb
 config/database.yml
 .idea

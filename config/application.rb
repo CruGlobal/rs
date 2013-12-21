@@ -58,5 +58,7 @@ module Rs
     config.assets.version = '1.0'
 
     config.from_file 'settings.yml'
+
+    config.action_mailer.delivery_method = :smtp
   end
 end
