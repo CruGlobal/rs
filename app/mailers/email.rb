@@ -1,5 +1,5 @@
 class Email < ActionMailer::Base
-	default :sender => 'no-reply@cru.org', :content_type => "text/html"
+	default :sender => 'donotreply@cru.org', :content_type => "text/html"
 
 	def car(driver_ride_id)
 		@driver = Ride.find(driver_ride_id)
