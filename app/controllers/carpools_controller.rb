@@ -27,8 +27,8 @@ class CarpoolsController < ApplicationController
       @spaces=0
       @riders_done=0
       @drivers.each do |driver|
-        @spaces += driver.number_passengers
-				@riders_done+=driver.current_passengers_number
+        @spaces += driver.number_passengers.to_i
+				@riders_done += driver.current_passengers_number.to_i
       end
       @latitude_avg=0
       @longitude_avg=0
