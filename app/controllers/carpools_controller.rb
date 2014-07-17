@@ -265,9 +265,9 @@ class CarpoolsController < ApplicationController
         )
 
         begin
-          coordinates = Geocoder.coordinates(@ride.address_single_line)
-          @ride.latitude = coordinates[0]
-          @ride.longitude = coordinates[1]
+          coordinates = Geocoder.search(@ride.address_single_line).first
+          @ride.latitude = coordinates.latitude
+          @ride.longitude = coordinates.longitude
         rescue
           # ignore coordinate failures
         end

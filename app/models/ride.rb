@@ -114,9 +114,10 @@ class Ride < ActiveRecord::Base
   def set_geocode
     [:address1, :address2, :address3, :address4, :country, :city, :state, :zip].each do |field|
       if changed.include?(field.to_s)
-        coordinates = Geocoder.coordinates(address_single_line)
-        @latitude  = coordinates[0]
-        @longitude = coordinates[1]
+        results = Geocoder.search(address_single_line)
+        coordinates = results.first if results.present?
+        @latitude  = coordinates.latitude if coordinates
+        @longitude = coordinates.longitude if coordinates
 
         self.latitude   = @latitude
         self.longitude  = @longitude

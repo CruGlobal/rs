@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131213144924) do
+ActiveRecord::Schema.define(version: 20140620210430) do
 
   create_table "academic_departments", force: true do |t|
     t.string "name"
@@ -1339,7 +1339,7 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.integer  "maxNoStudentPCouples"
     t.integer  "maxNoStudentPFamilies"
     t.integer  "maxNoStudentP"
-    t.integer  "global_registry_id"
+    t.string   "global_registry_id"
   end
 
   add_index "hr_si_project", ["global_registry_id"], name: "index_hr_si_project_on_global_registry_id", using: :btree
@@ -1630,11 +1630,13 @@ ActiveRecord::Schema.define(version: 20131213144924) do
 
   create_table "ministries", force: true do |t|
     t.string "name"
+    t.string "abbreviation"
+    t.string "global_registry_id"
   end
 
   create_table "ministry_activity", primary_key: "ActivityID", force: true do |t|
     t.string   "status",                   limit: 2
-    t.datetime "periodBegin"
+    t.date     "periodBegin"
     t.datetime "periodEnd_deprecated"
     t.string   "strategy",                 limit: 2
     t.string   "transUsername",            limit: 50
@@ -1647,6 +1649,7 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "gcx_site"
+    t.string   "global_registry_id"
   end
 
   add_index "ministry_activity", ["fk_targetAreaID", "strategy"], name: "index_ministry_activity_on_fk_targetareaid_and_strategy", unique: true, using: :btree
@@ -1767,7 +1770,7 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.string   "dept_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "global_registry_id"
+    t.string   "global_registry_id"
   end
 
   add_index "ministry_locallevel", ["global_registry_id"], name: "index_ministry_locallevel_on_global_registry_id", using: :btree
@@ -1779,6 +1782,7 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.boolean  "is_leader"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "global_registry_id"
   end
 
   add_index "ministry_missional_team_member", ["personID"], name: "personID", using: :btree
@@ -1921,7 +1925,7 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.decimal  "balance_daily",                                    precision: 10, scale: 2
     t.string   "siebel_contact_id"
     t.string   "sp_gcx_site"
-    t.integer  "global_registry_id"
+    t.string   "global_registry_id"
   end
 
   add_index "ministry_person", ["accountNo"], name: "accountNo_ministry_Person", using: :btree
@@ -1955,26 +1959,27 @@ ActiveRecord::Schema.define(version: 20131213144924) do
   add_index "ministry_regionalstat", ["fk_regionalTeamID"], name: "fk_regionalTeamID", using: :btree
 
   create_table "ministry_regionalteam", primary_key: "teamID", force: true do |t|
-    t.string   "name",      limit: 100
+    t.string   "name",               limit: 100
     t.string   "note"
-    t.string   "region",    limit: 2
-    t.string   "address1",  limit: 35
-    t.string   "address2",  limit: 35
-    t.string   "city",      limit: 30
-    t.string   "state",     limit: 6
-    t.string   "zip",       limit: 10
-    t.string   "country",   limit: 64
-    t.string   "phone",     limit: 24
-    t.string   "fax",       limit: 24
-    t.string   "email",     limit: 50
+    t.string   "region",             limit: 2
+    t.string   "address1",           limit: 35
+    t.string   "address2",           limit: 35
+    t.string   "city",               limit: 30
+    t.string   "state",              limit: 6
+    t.string   "zip",                limit: 10
+    t.string   "country",            limit: 64
+    t.string   "phone",              limit: 24
+    t.string   "fax",                limit: 24
+    t.string   "email",              limit: 50
     t.string   "url"
-    t.string   "isActive",  limit: 1
+    t.string   "isActive",           limit: 1
     t.datetime "startdate"
     t.datetime "stopdate"
-    t.string   "no",        limit: 80
-    t.string   "abbrv",     limit: 80
-    t.string   "hrd",       limit: 50
-    t.string   "spPhone",   limit: 24
+    t.string   "no",                 limit: 80
+    t.string   "abbrv",              limit: 80
+    t.string   "hrd",                limit: 50
+    t.string   "spPhone",            limit: 24
+    t.string   "global_registry_id"
   end
 
   create_table "ministry_staff", force: true do |t|
@@ -2185,8 +2190,11 @@ ActiveRecord::Schema.define(version: 20131213144924) do
   add_index "ministry_statistic_before_pg_merge", ["periodEnd"], name: "index3", using: :btree
 
   create_table "ministry_strategy", primary_key: "strategyID", force: true do |t|
-    t.string "name"
-    t.string "abreviation"
+    t.string  "name"
+    t.string  "abreviation"
+    t.integer "position",    default: 0, null: false
+    t.boolean "event",                   null: false
+    t.boolean "city",                    null: false
   end
 
   create_table "ministry_targetarea", primary_key: "targetAreaID", force: true do |t|
@@ -2246,6 +2254,8 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.datetime "updated_at"
     t.decimal  "latitude",                           precision: 11, scale: 7
     t.decimal  "longitude",                          precision: 11, scale: 7
+    t.string   "global_registry_id"
+    t.string   "gate"
   end
 
   add_index "ministry_targetarea", ["country"], name: "index4", using: :btree
@@ -2375,16 +2385,16 @@ ActiveRecord::Schema.define(version: 20131213144924) do
   end
 
   create_table "ministry_viewsortedactivities", id: false, force: true do |t|
-    t.string   "name",            limit: 100
-    t.string   "url"
-    t.string   "facebook"
-    t.integer  "ActivityID",                  default: 0, null: false
-    t.string   "status",          limit: 2
-    t.datetime "periodBegin"
-    t.string   "strategy",        limit: 2
-    t.string   "transUsername",   limit: 50
-    t.integer  "fk_teamID",                               null: false
-    t.integer  "fk_targetAreaID",                         null: false
+    t.string  "name",            limit: 100
+    t.string  "url"
+    t.string  "facebook"
+    t.integer "ActivityID",                  default: 0, null: false
+    t.string  "status",          limit: 2
+    t.date    "periodBegin"
+    t.string  "strategy",        limit: 2
+    t.string  "transUsername",   limit: 50
+    t.integer "fk_teamID",                               null: false
+    t.integer "fk_targetAreaID",                         null: false
   end
 
   create_table "ministry_viewstaffdependents", id: false, force: true do |t|
@@ -2894,10 +2904,11 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.boolean  "intern_access"
     t.boolean  "stint_access"
     t.boolean  "mtl_access"
-    t.boolean  "individual_access", default: false
+    t.boolean  "individual_access",       default: false
     t.integer  "person_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "grant_individual_access", default: false, null: false
   end
 
   create_table "phone_numbers", force: true do |t|
@@ -3684,6 +3695,9 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.integer  "send_dept"
     t.string   "regionOfOrigin",        limit: 50
     t.date     "background_check_date"
+    t.string   "ptfs_level"
+    t.string   "supervisor"
+    t.string   "work_location"
   end
 
   add_index "sitrack_tracking", ["application_id"], name: "fk_applicationID", using: :btree
@@ -3794,7 +3808,10 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.integer  "account_balance"
     t.datetime "accepted_at"
     t.string   "previous_status"
-    t.integer  "global_registry_id",       limit: 8
+    t.string   "global_registry_id"
+    t.boolean  "rm_liability_signed"
+    t.date     "start_date"
+    t.date     "end_date"
   end
 
   add_index "sp_applications", ["global_registry_id"], name: "index_sp_applications_on_global_registry_id", using: :btree
@@ -3915,12 +3932,12 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "global_registry_id", limit: 8
+    t.string   "global_registry_id"
   end
 
   create_table "sp_ministry_focuses", force: true do |t|
-    t.string  "name"
-    t.integer "global_registry_id", limit: 8
+    t.string "name"
+    t.string "global_registry_id"
   end
 
   create_table "sp_page_elements", force: true do |t|
@@ -3960,18 +3977,18 @@ ActiveRecord::Schema.define(version: 20131213144924) do
     t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "global_registry_id",  limit: 8
+    t.string   "global_registry_id"
   end
 
   add_index "sp_project_gospel_in_actions", ["gospel_in_action_id"], name: "gospel_in_action_id", using: :btree
   add_index "sp_project_gospel_in_actions", ["project_id"], name: "project_id", using: :btree
 
   create_table "sp_project_ministry_focuses", force: true do |t|
-    t.integer  "project_id",                   default: 0, null: false
-    t.integer  "ministry_focus_id",            default: 0, null: false
+    t.integer  "project_id",         default: 0, null: false
+    t.integer  "ministry_focus_id",  default: 0, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "global_registry_id", limit: 8
+    t.string   "global_registry_id"
   end
 
   create_table "sp_project_versions", force: true do |t|
@@ -4065,3 +4082,276 @@ ActiveRecord::Schema.define(version: 20131213144924) do
   add_index "sp_project_versions", ["start_date"], name: "index_sp_project_versions_on_start_date", using: :btree
   add_index "sp_project_versions", ["year"], name: "index_sp_project_versions_on_year", using: :btree
 
+  create_table "sp_projects", force: true do |t|
+    t.integer  "pd_id"
+    t.integer  "apd_id"
+    t.integer  "opd_id"
+    t.string   "name",                               limit: 200
+    t.string   "city",                               limit: 50
+    t.string   "state",                              limit: 50
+    t.string   "country",                            limit: 60
+    t.string   "world_region",                       limit: 50
+    t.string   "display_location",                   limit: 100
+    t.string   "primary_partner",                    limit: 100
+    t.string   "secondary_partner",                  limit: 100
+    t.boolean  "partner_region_only"
+    t.string   "report_stats_to",                    limit: 50
+    t.date     "start_date"
+    t.date     "end_date"
+    t.integer  "weeks"
+    t.integer  "primary_ministry_focus_id"
+    t.boolean  "job"
+    t.text     "description"
+    t.string   "operating_business_unit",            limit: 50
+    t.string   "operating_operating_unit",           limit: 50
+    t.string   "operating_department",               limit: 50
+    t.string   "operating_project",                  limit: 50
+    t.string   "operating_designation",              limit: 50
+    t.string   "scholarship_business_unit",          limit: 50
+    t.string   "scholarship_operating_unit",         limit: 50
+    t.string   "scholarship_department",             limit: 50
+    t.string   "scholarship_project",                limit: 50
+    t.string   "scholarship_designation",            limit: 50
+    t.integer  "staff_cost"
+    t.integer  "intern_cost"
+    t.integer  "student_cost"
+    t.string   "departure_city",                     limit: 60
+    t.date     "date_of_departure"
+    t.string   "destination_city",                   limit: 60
+    t.date     "date_of_return"
+    t.text     "in_country_contact"
+    t.string   "medical_clinic"
+    t.string   "medical_clinic_location"
+    t.string   "project_contact_name",               limit: 50
+    t.string   "project_contact_role",               limit: 40
+    t.string   "project_contact_phone",              limit: 20
+    t.string   "project_contact_email",              limit: 100
+    t.integer  "max_student_men_applicants",                      default: 70,           null: false
+    t.integer  "max_student_women_applicants",                    default: 70,           null: false
+    t.integer  "max_accepted_men"
+    t.integer  "max_accepted_women"
+    t.integer  "ideal_staff_men",                                 default: 0,            null: false
+    t.integer  "ideal_staff_women",                               default: 0,            null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "created_by_id"
+    t.integer  "updated_by_id"
+    t.integer  "current_students_men",                            default: 0
+    t.integer  "current_students_women",                          default: 0
+    t.integer  "current_applicants_men",                          default: 0
+    t.integer  "current_applicants_women",                        default: 0
+    t.integer  "year",                                                                   null: false
+    t.integer  "coordinator_id"
+    t.integer  "old_id"
+    t.string   "project_status"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.string   "url",                                limit: 1024
+    t.string   "url_title"
+    t.string   "ds_project_code",                    limit: 50
+    t.boolean  "show_on_website",                                 default: true
+    t.date     "apply_by_date"
+    t.integer  "version"
+    t.boolean  "use_provided_application",                        default: true
+    t.string   "tertiary_partner"
+    t.date     "staff_start_date"
+    t.date     "staff_end_date"
+    t.string   "facebook_url"
+    t.string   "blog_url"
+    t.string   "blog_title"
+    t.string   "project_contact2_name"
+    t.string   "project_contact2_role"
+    t.string   "project_contact2_phone"
+    t.string   "project_contact2_email"
+    t.string   "picture_file_name"
+    t.string   "picture_content_type"
+    t.integer  "picture_file_size"
+    t.datetime "picture_updated_at"
+    t.string   "logo_file_name"
+    t.string   "logo_content_type"
+    t.integer  "logo_file_size"
+    t.datetime "logo_updated_at"
+    t.integer  "basic_info_question_sheet_id"
+    t.integer  "template_question_sheet_id"
+    t.integer  "project_specific_question_sheet_id"
+    t.boolean  "high_school",                                     default: false
+    t.date     "pd_start_date"
+    t.date     "pd_end_date"
+    t.date     "pd_close_start_date"
+    t.date     "pd_close_end_date"
+    t.date     "student_staff_start_date"
+    t.date     "student_staff_end_date"
+    t.boolean  "background_checks_required",                      default: false
+    t.date     "open_application_date",                           default: '2012-11-01'
+    t.date     "archive_project_date",                            default: '2012-08-31'
+    t.boolean  "secure"
+    t.string   "global_registry_id"
+    t.text     "project_summary"
+    t.text     "full_project_description"
+  end
+
+  add_index "sp_projects", ["global_registry_id"], name: "index_sp_projects_on_global_registry_id", using: :btree
+  add_index "sp_projects", ["name"], name: "sp_projects_name_index", unique: true, using: :btree
+  add_index "sp_projects", ["primary_partner"], name: "primary_partner", using: :btree
+  add_index "sp_projects", ["project_status"], name: "project_status", using: :btree
+  add_index "sp_projects", ["secondary_partner"], name: "secondary_partner", using: :btree
+  add_index "sp_projects", ["year"], name: "year", using: :btree
+
+  create_table "sp_question_options", force: true do |t|
+    t.integer  "question_id"
+    t.string   "option",      limit: 50
+    t.string   "value",       limit: 50
+    t.integer  "position"
+    t.datetime "created_at"
+  end
+
+  create_table "sp_question_sheets", force: true do |t|
+    t.string  "label",    limit: 1000,                 null: false
+    t.boolean "archived",              default: false
+  end
+
+  create_table "sp_questionnaire_pages", force: true do |t|
+    t.integer  "questionnaire_id"
+    t.integer  "page_id"
+    t.integer  "position"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sp_references", force: true do |t|
+    t.integer  "question_id"
+    t.integer  "applicant_answer_sheet_id"
+    t.datetime "email_sent_at"
+    t.string   "relationship"
+    t.string   "title"
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "phone"
+    t.string   "email"
+    t.string   "status"
+    t.datetime "submitted_at"
+    t.string   "access_key"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "is_staff",                  default: false
+    t.datetime "started_at"
+  end
+
+  add_index "sp_references", ["question_id"], name: "question_id", using: :btree
+
+  create_table "sp_roles", force: true do |t|
+    t.string "role",       limit: 50
+    t.string "user_class"
+  end
+
+  create_table "sp_staff", force: true do |t|
+    t.integer  "person_id",                                   null: false
+    t.integer  "project_id",                                  null: false
+    t.string   "type",               limit: 100, default: "", null: false
+    t.string   "year"
+    t.string   "global_registry_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "sp_staff", ["person_id"], name: "person_id", using: :btree
+  add_index "sp_staff", ["project_id", "type", "year"], name: "project_staff_type", using: :btree
+
+  create_table "sp_stats", force: true do |t|
+    t.integer  "project_id"
+    t.integer  "spiritual_conversations_initiated"
+    t.integer  "gospel_shared"
+    t.integer  "received_christ"
+    t.integer  "holy_spirit_presentations"
+    t.integer  "holy_spirit_filled"
+    t.integer  "other_exposures"
+    t.integer  "involved_new_believers"
+    t.integer  "students_involved"
+    t.integer  "spiritual_multipliers"
+    t.string   "type",                              limit: 50
+    t.integer  "year"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "created_by_id"
+    t.integer  "updated_by_id"
+    t.integer  "gospel_shared_personal"
+    t.integer  "gospel_shared_group"
+    t.integer  "gospel_shared_media"
+    t.integer  "pioneer_campuses"
+    t.integer  "key_contact_campuses"
+    t.integer  "launched_campuses"
+    t.integer  "movements_launched"
+    t.string   "global_registry_id"
+  end
+
+  create_table "sp_student_quotes", force: true do |t|
+    t.integer  "project_id"
+    t.text     "quote"
+    t.text     "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "global_registry_id"
+  end
+
+  add_index "sp_student_quotes", ["project_id"], name: "project_id", using: :btree
+
+  create_table "sp_users", force: true do |t|
+    t.integer  "ssm_id"
+    t.datetime "last_login"
+    t.datetime "created_at"
+    t.integer  "created_by_id"
+    t.string   "type"
+    t.integer  "person_id"
+    t.string   "global_registry_id"
+  end
+
+  add_index "sp_users", ["person_id"], name: "person_id", using: :btree
+  add_index "sp_users", ["ssm_id"], name: "sp_users_ssm_id_index", unique: true, using: :btree
+
+  create_table "sp_world_regions", force: true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "global_registry_id"
+  end
+
+  create_table "staffsite_staffsitepref", primary_key: "StaffSitePrefID", force: true do |t|
+    t.string "name",                limit: 64
+    t.string "displayName"
+    t.string "value"
+    t.string "fk_StaffSiteProfile", limit: 64
+  end
+
+  add_index "staffsite_staffsitepref", ["fk_StaffSiteProfile"], name: "index1", using: :btree
+  add_index "staffsite_staffsitepref", ["name"], name: "index2", using: :btree
+
+  create_table "staffsite_staffsiteprofile", primary_key: "StaffSiteProfileID", force: true do |t|
+    t.string  "firstName",        limit: 64
+    t.string  "lastName",         limit: 64
+    t.string  "userName",         limit: 64
+    t.boolean "changePassword"
+    t.boolean "captureHRinfo"
+    t.string  "accountNo",        limit: 64
+    t.boolean "isStaff"
+    t.string  "email",            limit: 64
+    t.string  "passwordQuestion", limit: 64
+    t.string  "passwordAnswer",   limit: 64
+  end
+
+  add_index "staffsite_staffsiteprofile", ["userName"], name: "index1", using: :btree
+
+  create_table "states", force: true do |t|
+    t.string "state", limit: 100
+    t.string "code",  limit: 10
+  end
+
+  create_table "super_admins", force: true do |t|
+    t.integer  "user_id"
+    t.string   "site"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "super_admins", ["user_id"], name: "index_super_admins_on_user_id", using: :btree
+
+end
